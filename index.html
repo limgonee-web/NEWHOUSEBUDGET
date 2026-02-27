@@ -157,9 +157,10 @@ function sortAndRecalc(arr){
   if(!arr.length)return;
   let bal=0;
   for(let i=0;i<arr.length;i++){
-    const amt=N(arr[i].amount),cat=arr[i].category||'';
-    if(amt<0||cat==='이월'||cat==='입금'){bal+=Math.abs(amt);}
-    else{bal-=amt;}
+    const cat=arr[i].category||'';
+    const amt=Math.abs(N(arr[i].amount));
+    if(cat==='이월'||cat==='입금'||cat==='수입') bal+=amt;
+    else bal-=amt;
     arr[i].balance=bal;
   }
 }
