@@ -12,6 +12,11 @@ body{background:var(--bg);color:var(--t2);font-family:-apple-system,BlinkMacSyst
 .header-inner{max-width:1200px;margin:0 auto}
 .header-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 h1{font-size:21px;font-weight:700;color:var(--accent)}
+.sync-indicator{font-size:12px;padding:4px 10px;border-radius:20px;font-weight:600;margin-left:8px}
+.sync-indicator.ok{background:#f0fdf4;color:#059669}
+.sync-indicator.syncing{background:#eff6ff;color:#3b82f6;animation:pulse 1s infinite}
+.sync-indicator.err{background:#fef2f2;color:#dc2626}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 select.mi{background:#fff;border:1px solid var(--border);border-radius:14px;padding:9px 16px;color:var(--t2);font-size:14px;outline:none;cursor:pointer;box-shadow:var(--shadow);-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M3 5l3 3 3-3'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
 select.mi:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,0.12)}
 .tabs{display:flex;gap:3px;padding:3px;background:#f1f3f9;border-radius:12px;margin-top:14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -24,7 +29,7 @@ select.mi:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,
 .sc:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
 .sc .icon{position:absolute;top:12px;right:14px;font-size:28px;opacity:.75}
 .sc .lb{font-size:13px;color:var(--t4);margin-bottom:4px}
-.sc .vl{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.sc .vl{font-size:22px;font-weight:700}
 .sc .sb{font-size:13px;color:var(--t5);margin-top:3px}
 .pn{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:var(--shadow)}
 .pt{font-size:16px;font-weight:600;color:var(--t2);margin-bottom:16px}
@@ -38,7 +43,7 @@ select.mi:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,
 .budget-card .bc-fill{height:100%;border-radius:4px;transition:width .6s ease}
 .budget-card .bc-row{display:flex;justify-content:space-between;font-size:14px;padding:3px 0}
 .budget-card .bc-row .l{color:var(--t4)}
-.budget-card .bc-row .v{color:var(--t2);font-weight:600;font-variant-numeric:tabular-nums}
+.budget-card .bc-row .v{color:var(--t2);font-weight:600}
 .budget-card .bc-memo{margin-top:8px;padding-top:8px;border-top:1px dashed #e5e7eb;font-size:13px;color:var(--t5);font-style:italic}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
 @media(max-width:700px){.g2{grid-template-columns:1fr}}
@@ -53,10 +58,8 @@ col.c-date{width:85px}col.c-cat{width:80px}col.c-detail{width:130px}col.c-amount
 tr.dr{border-bottom:1px solid #f3f4f6;cursor:pointer;transition:background .15s}
 tr.dr:hover{background:#f5f3ff}
 .ct{display:inline-block;padding:3px 10px;border-radius:16px;font-size:12px;font-weight:600}
-.td-a{font-variant-numeric:tabular-nums;font-weight:600;color:var(--t1)}
-.td-a.inc{color:var(--green)}
-.td-b{color:var(--t4);font-variant-numeric:tabular-nums}
-.td-n{color:var(--t5);font-size:13px}
+.td-a{font-weight:600;color:var(--t1)}.td-a.inc{color:var(--green)}
+.td-b{color:var(--t4)}.td-n{color:var(--t5);font-size:13px}
 .fp{background:#f9fafb;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px;display:none}
 .fp.show{display:block}
 .fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
@@ -82,7 +85,7 @@ input[type="number"].fi{-moz-appearance:textfield}
 .cat-bar-item.active{border-color:var(--accent);background:rgba(99,102,241,0.08);color:var(--accent)}
 .cat-bar-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .cat-bar-pct{color:var(--t4);font-weight:600}
-.mi-item{display:flex;align-items:flex-start;gap:8px;padding:10px 0;border-bottom:1px solid #f3f4f6;cursor:pointer;transition:background .15s;border-radius:6px;padding-left:6px;padding-right:6px}
+.mi-item{display:flex;align-items:flex-start;gap:8px;padding:10px 0;border-bottom:1px solid #f3f4f6;cursor:pointer;border-radius:6px;padding-left:6px;padding-right:6px}
 .mi-item:hover{background:#f5f3ff}
 .mi-item .text{flex:1;color:var(--t3);font-size:15px;line-height:1.6}
 .legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
@@ -93,14 +96,14 @@ input[type="number"].fi{-moz-appearance:textfield}
 .pg{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
 .pc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
 .pc h4{font-size:15px;font-weight:600;color:var(--t2);margin-bottom:12px}
-.pr{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid #f3f4f6;cursor:pointer;transition:background .1s;border-radius:4px}
+.pr{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid #f3f4f6;cursor:pointer;border-radius:4px}
 .pr:hover{background:#f9fafb}
-.pr .l{color:var(--t4)}.pr .rv{color:var(--t2);font-weight:500;font-variant-numeric:tabular-nums}
+.pr .l{color:var(--t4)}.pr .rv{color:var(--t2);font-weight:500}
 .pr.tot{border-top:2px solid var(--border);font-weight:700;padding-top:8px;margin-top:4px;cursor:default}
 .pr.tot:hover{background:transparent}
 .pr.tot .l{color:var(--t1)}.pr.tot .rv{color:var(--accent)}
 .pr.noclick{cursor:default}.pr.noclick:hover{background:transparent}
-.er{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:14px;cursor:pointer;transition:background .1s;border-radius:4px}
+.er{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:14px;cursor:pointer;border-radius:4px}
 .er:hover{background:#f9fafb}
 .modal-bg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);z-index:100;align-items:center;justify-content:center}
 .modal-bg.show{display:flex}
@@ -116,21 +119,21 @@ input[type="number"].fi{-moz-appearance:textfield}
 .chg-pos{color:var(--green);font-size:12px;font-weight:600}
 .chg-neg{color:var(--red);font-size:12px;font-weight:600}
 .donut-legend-pct{font-size:11px;color:var(--t4);font-weight:600;margin-left:2px}
-.budget-eval{font-size:12px;color:var(--t5);margin-top:2px;font-family:monospace}
 .bal-label{font-size:14px;color:var(--accent);margin-top:3px;font-weight:600}
-.auto-sync-banner{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:10px 16px;margin-bottom:16px;font-size:13px;color:#059669;display:flex;align-items:center;gap:8px}
-.auto-sync-banner.error{background:#fef2f2;border-color:#fecaca;color:#dc2626}
-.auto-sync-banner.loading{background:#eff6ff;border-color:#bfdbfe;color:#3b82f6}
+.toast{position:fixed;bottom:24px;right:24px;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:200;box-shadow:0 4px 12px rgba(0,0,0,0.15);transform:translateY(100px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:#f0fdf4;color:#059669;border:1px solid #bbf7d0}
+.toast.err{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+.toast.info{background:#eff6ff;color:#3b82f6;border:1px solid #bfdbfe}
 </style>
 </head>
 <body>
 <div class="header"><div class="header-inner">
-<div class="header-top"><div><h1>💰 상도댁 월간 자금 융통 작전</h1></div><select class="mi" id="monthPicker"></select></div>
+<div class="header-top"><div style="display:flex;align-items:center;gap:6px"><h1>💰 상도댁 가계부</h1><span class="sync-indicator ok" id="syncBadge">✓ 연결됨</span></div><select class="mi" id="monthPicker"></select></div>
 <div class="tabs">
-<button class="tb active" data-tab="overview">📊 총괄</button><button class="tb" data-tab="household">🏠 가계부</button><button class="tb" data-tab="goeun">🧶 고은</button><button class="tb" data-tab="hyunghwan">🎮 형환</button><button class="tb" data-tab="travel">✈️ 여행저금통</button><button class="tb" data-tab="assets">💎 자금현황</button><button class="tb" data-tab="plan">📋 총괄계획</button><button class="tb" data-tab="sync">🔗 시트연동</button>
+<button class="tb active" data-tab="overview">📊 총괄</button><button class="tb" data-tab="household">🏠 가계부</button><button class="tb" data-tab="goeun">🧶 고은</button><button class="tb" data-tab="hyunghwan">🎮 형환</button><button class="tb" data-tab="travel">✈️ 여행저금통</button><button class="tb" data-tab="assets">💎 자금현황</button><button class="tb" data-tab="plan">📋 총괄계획</button>
 </div></div></div>
 <div class="container">
-<div id="autoSyncBanner"></div>
 <div class="tc active" id="tab-overview">
 <div class="cards" id="statCards"></div>
 <div class="pn"><div class="pt">📋 예산 소진 현황</div><div class="budget-grid" id="budgetGrid"></div></div>
@@ -170,46 +173,63 @@ input[type="number"].fi{-moz-appearance:textfield}
 <div class="cards" style="margin-bottom:16px"><div class="sc" style="cursor:default"><div class="icon">✈️</div><div class="lb">저금통 잔액</div><div class="vl" style="color:var(--green)" id="travelBal">₩0</div></div><div class="sc" style="cursor:default"><div class="icon">💰</div><div class="lb">총 입금</div><div class="vl" style="color:var(--accent)" id="travelIn">₩0</div></div><div class="sc" style="cursor:default"><div class="icon">💸</div><div class="lb">총 출금</div><div class="vl" style="color:var(--red)" id="travelOut">₩0</div></div></div>
 <div class="pn" style="padding:14px"><div class="tw"><table style="table-layout:fixed"><colgroup><col style="width:80px"><col style="width:90px"><col style="width:90px"><col style="width:130px"><col style="width:100px"></colgroup><thead><tr><th>날짜</th><th>입금</th><th>출금</th><th>상세</th><th>잔액</th></tr></thead><tbody id="tbody-travel"></tbody></table></div></div>
 </div>
-<div class="tc" id="tab-sync"><div class="pn"><div class="pt">🔗 구글 시트 연동 설정</div><div style="font-size:14px;color:var(--t4);margin-bottom:16px;line-height:1.8">💡 <b>페이지 로드 시 자동으로 시트 데이터를 불러옵니다.</b><br>수동 동기화가 필요할 때만 아래 버튼을 사용하세요.</div><div style="display:flex;gap:8px;margin-bottom:16px"><input class="fi" id="gasUrl" placeholder="https://script.google.com/macros/s/..." style="flex:1"><button class="bs" id="btnConnect">연결</button></div><div id="syncStatus" style="font-size:14px;color:var(--t5);margin-bottom:16px"></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ab" id="btnPull">📥 시트→앱</button><button class="ab" id="btnPush">📤 앱→시트</button></div><div id="syncLog" style="margin-top:16px;font-size:13px;color:var(--t4);max-height:200px;overflow-y:auto"></div></div></div>
 <div class="tc" id="tab-assets"><div class="sh"><h2>💎 자금 현황</h2><button class="ab" id="btnOpenAsset">+ 추가</button></div><div id="assetsList"></div></div>
 <div class="tc" id="tab-plan"><div class="sh"><h2>📋 총괄 계획</h2></div><div class="pg" id="planGrid"></div></div>
 </div>
 
-<div class="modal-bg" id="actionModal"><div class="modal" id="actionModalContent"></div></div>
 <div class="modal-bg" id="editModal"><div class="modal"><h3 id="editModalTitle">수정</h3><div class="fg" id="editModalFields"></div><div class="fa" style="margin-top:16px"><button class="btn-red" id="btnDeleteEdit">삭제</button><div style="flex:1"></div><button class="bc-btn" id="btnCloseEdit">취소</button><button class="bs" id="btnSaveEdit">저장</button></div></div></div>
 <div class="modal-bg" id="assetModal"><div class="modal"><h3 id="assetModalTitle">💎 추가</h3><div class="fg" style="margin-bottom:12px"><div style="grid-column:1/-1"><label>시점</label><input id="as-period" class="fi" placeholder="2026-02-25"></div></div><div style="font-size:14px;color:var(--pink);font-weight:600;margin:12px 0 8px">🧶 고은</div><div class="fg"><div><label>현금</label><input type="number" id="as-ge-cash" class="fi"></div><div><label>청약</label><input type="number" id="as-ge-sav" class="fi"></div><div><label>증권</label><input type="number" id="as-ge-stk" class="fi"></div><div><label>연금</label><input type="number" id="as-ge-pen" class="fi"></div><div><label>기타</label><input type="number" id="as-ge-etc" class="fi"></div></div><div style="font-size:14px;color:var(--blue);font-weight:600;margin:12px 0 8px">🎮 형환</div><div class="fg"><div><label>현금</label><input type="number" id="as-hw-cash" class="fi"></div><div><label>청약</label><input type="number" id="as-hw-sav" class="fi"></div><div><label>증권</label><input type="number" id="as-hw-stk" class="fi"></div><div><label>연금</label><input type="number" id="as-hw-pen" class="fi"></div><div><label>기타</label><input type="number" id="as-hw-etc" class="fi"></div></div><div style="font-size:14px;color:var(--t4);font-weight:600;margin:12px 0 8px">🏠 전세 보증금</div><div class="fg"><div><label>보증금</label><input type="number" id="as-deposit" class="fi" value="350000000"></div></div><div class="fa" style="margin-top:16px"><button class="bc-btn" id="btnCloseAsset">취소</button><button class="bs" id="btnSaveAsset">저장</button></div></div></div>
 <div class="modal-bg" id="planModal"><div class="modal"><h3 id="planModalTitle">항목</h3><div class="fg" id="planModalFields"></div><div class="fa" style="margin-top:16px"><button class="btn-red" id="btnDeletePlan" style="display:none">삭제</button><div style="flex:1"></div><button class="bc-btn" id="btnClosePlan">취소</button><button class="bs" id="btnSavePlan">저장</button></div></div></div>
 <div class="modal-bg" id="budgetModal"><div class="modal"><h3>📋 예산 수정</h3><div id="budgetModalFields"></div><div class="fa" style="margin-top:16px"><button class="bc-btn" id="btnCloseBudget">취소</button><button class="bs" id="btnSaveBudget">저장</button></div></div></div>
 <div class="modal-bg" id="extraModal"><div class="modal"><h3 id="extraModalTitle">기타 지출</h3><div class="fg" id="extraModalFields"></div><div class="fa" style="margin-top:16px"><button class="btn-red" id="btnDeleteExtra" style="display:none">삭제</button><div style="flex:1"></div><button class="bc-btn" id="btnCloseExtra">취소</button><button class="bs" id="btnSaveExtra">저장</button></div></div></div>
+<div class="toast" id="toast"></div>
 
 <script>
-// ★ GAS URL
-const HARDCODED_GAS_URL = "https://script.google.com/macros/s/AKfycbz9lg4UhaH231QzfyZiqmdhSxqcDLLpy4gufHMc_yCvGEIQ0GzK1knHdwUxqu1daG0O/exec";
-
+const GAS_URL="https://script.google.com/macros/s/AKfycbx7i4vwMUBVsMKO3hHGw2LIdQZDJN9uR3m68eC27gKKhQngXbg-l_vMu0aRGbHhgh0N/exec";
 const CC={"입금":"#059669","고정비":"#6366f1","식비":"#d97706","생필품비":"#ec4899","고양이비":"#8b5cf6","가족비":"#dc2626","경조사비":"#dc2626","이월":"#6b7280","수입":"#059669","미용":"#ec4899","취미":"#3b82f6","관계":"#14b8a6","교통":"#a855f7","기타":"#9ca3af","병원":"#06b6d4","구독":"#8b5cf6","여행저금통":"#d97706","선물":"#ec4899","컨텐츠":"#3b82f6","사무용품":"#9ca3af","생활용품":"#ec4899"};
 const fmt=n=>{if(n==null||isNaN(n))return"0";return Math.abs(n).toLocaleString("ko-KR")};
 const N=n=>Number(n)||0;
-
-function fmtD(d){
-  if(!d)return"";
-  if(/^\d{4}\.\s*\d{1,2}$/.test(String(d).trim())){const p=String(d).trim().split(/\.\s*/);return p[0]+'-'+p[1].padStart(2,'0');}
-  if(/^\d{4}\.\s*\d{1,2}\.\s*\d{1,2}$/.test(String(d).trim())){const p=String(d).trim().split(/\.\s*/);return p[0]+'-'+p[1].padStart(2,'0')+'-'+p[2].padStart(2,'0');}
-  if(/^\d{4}-\d{2}(-\d{2})?$/.test(String(d).trim()))return String(d).trim();
-  const t=new Date(d);
-  if(!isNaN(t)){const y=t.getFullYear(),m=String(t.getMonth()+1).padStart(2,'0'),day=String(t.getDate()).padStart(2,'0');return y+'-'+m+'-'+day;}
-  return String(d);
-}
-
-let nid={household:200,goeun:200,hyunghwan:200};
+function fmtD(d){if(!d)return"";const s=String(d).trim();if(/^\d{4}\.\s*\d{1,2}$/.test(s)){const p=s.split(/\.\s*/);return p[0]+'-'+p[1].padStart(2,'0');}if(/^\d{4}\.\s*\d{1,2}\.\s*\d{1,2}$/.test(s)){const p=s.split(/\.\s*/);return p[0]+'-'+p[1].padStart(2,'0')+'-'+p[2].padStart(2,'0');}if(/^\d{4}-\d{2}(-\d{2})?$/.test(s))return s;const t=new Date(d);if(!isNaN(t))return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');return s;}
 function evalFormula(s){if(typeof s!=='string')return N(s);s=s.trim();if(s.startsWith('=')){try{return N(eval(s.slice(1).replace(/[^0-9+\-*/.() ]/g,'')));}catch(e){return 0;}}return N(s);}
 
-// ★ 하드코딩 기본 데이터 (시트 연동 전 폴백)
+// ★ Toast 알림
+function toast(msg,type='ok'){const el=document.getElementById('toast');el.textContent=msg;el.className='toast '+type;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
+
+// ★ Sync badge
+function setSyncBadge(state){const b=document.getElementById('syncBadge');if(state==='ok'){b.textContent='✓ 연결됨';b.className='sync-indicator ok';}else if(state==='syncing'){b.textContent='↻ 동기화중';b.className='sync-indicator syncing';}else{b.textContent='✗ 오류';b.className='sync-indicator err';}}
+
+// ★★★ GAS POST 헬퍼 (모든 쓰기 작업이 이걸 통해 시트에 자동 반영) ★★★
+async function gasPost(body){
+  if(!GAS_URL)return null;
+  setSyncBadge('syncing');
+  try{
+    const r=await fetch(GAS_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(body)});
+    const j=await r.json();
+    if(j.error){toast('시트 저장 실패: '+j.error,'err');setSyncBadge('err');return null;}
+    setSyncBadge('ok');
+    return j;
+  }catch(e){toast('시트 연결 오류','err');setSyncBadge('err');return null;}
+}
+
+// ★★★ 시트에서 전체 새로고침 ★★★
+async function refreshFromSheet(){
+  if(!GAS_URL)return;
+  setSyncBadge('syncing');
+  try{
+    const result=await fetch(GAS_URL+'?action=getAllData',{redirect:'follow'}).then(r=>r.json());
+    if(result.error){setSyncBadge('err');return;}
+    applyAllData(result);
+    setSyncBadge('ok');
+  }catch(e){setSyncBadge('err');}
+}
+
+let nid={household:500,goeun:500,hyunghwan:500};
 const ALL_DATA={};
 let curMonth="2026-02",D=null;
 const catFilters={household:null,goeun:null,hyunghwan:null};
 const sharedTravel=[];
 const sharedAssets=[];
-const sharedPlan={income:[{id:1,item:"형환 월급(성과급 포함x)",amount:3200000},{id:2,item:"고니 월급",amount:3710000}],fixed:[{id:1,cat:"집",who:"공동",item:"전세금 이자",amount:828082,note:""},{id:2,cat:"집",who:"공동",item:"관리비",amount:180000,note:""},{id:3,cat:"집",who:"공동",item:"가스비",amount:150000,note:"겨울 18만, 여름 9만"},{id:4,cat:"집",who:"공동",item:"인터넷",amount:29700,note:""},{id:5,cat:"보험",who:"화니",item:"자동차",amount:70833,note:"11월 갱신"},{id:6,cat:"보험",who:"화니",item:"연금보험 연금저축",amount:20000,note:"월급 공제"},{id:7,cat:"보험",who:"화니",item:"실비(교보)",amount:9590,note:""},{id:8,cat:"보험",who:"화니",item:"운전자 상해보험",amount:29850,note:""},{id:9,cat:"보험",who:"고니",item:"실비(교직원 공제회)",amount:113360,note:""},{id:10,cat:"통신비",who:"화니",item:"핸드폰",amount:24900,note:""},{id:11,cat:"통신비",who:"고니",item:"핸드폰",amount:17000,note:""},{id:12,cat:"교통",who:"화니",item:"자동차 할부",amount:333333,note:"잔여 5회"},{id:13,cat:"교통",who:"화니",item:"전기차 충전",amount:100000,note:""},{id:14,cat:"교통",who:"화니",item:"셔틀버스",amount:13000,note:"월급 공제"},{id:15,cat:"교통",who:"고니",item:"K패스",amount:30000,note:""},{id:16,cat:"구독",who:"공동",item:"넷플릭스",amount:18500,note:""},{id:17,cat:"구독",who:"공동",item:"네이버",amount:4900,note:""},{id:18,cat:"구독",who:"고니",item:"삼케플",amount:7900,note:""},{id:19,cat:"구독",who:"화니",item:"삼케플",amount:7900,note:""}],living:[{id:1,item:"식비",amount:600000},{id:2,item:"생필품비",amount:100000},{id:3,item:"고양이비",amount:100000},{id:4,item:"경조사비",amount:400000}],allowance:[{id:1,item:"화니 용돈",amount:400000},{id:2,item:"고니 용돈",amount:400000}]};
+const sharedPlan={income:[{id:1,item:"형환 월급(성과급 포함x)",amount:3200000},{id:2,item:"고니 월급",amount:3710000}],fixed:[{id:1,cat:"집",who:"공동",item:"전세금 이자",amount:828082,note:""},{id:2,cat:"집",who:"공동",item:"관리비",amount:180000,note:""},{id:3,cat:"집",who:"공동",item:"가스비",amount:150000,note:"겨울 18만, 여름 9만"},{id:4,cat:"집",who:"공동",item:"인터넷",amount:29700,note:""},{id:5,cat:"보험",who:"화니",item:"자동차",amount:70833,note:""},{id:6,cat:"보험",who:"화니",item:"연금보험 연금저축",amount:20000,note:""},{id:7,cat:"보험",who:"화니",item:"실비(교보)",amount:9590,note:""},{id:8,cat:"보험",who:"화니",item:"운전자 상해보험",amount:29850,note:""},{id:9,cat:"보험",who:"고니",item:"실비(교직원 공제회)",amount:113360,note:""},{id:10,cat:"통신비",who:"화니",item:"핸드폰",amount:24900,note:""},{id:11,cat:"통신비",who:"고니",item:"핸드폰",amount:17000,note:""},{id:12,cat:"교통",who:"화니",item:"자동차 할부",amount:333333,note:"잔여 5회"},{id:13,cat:"교통",who:"화니",item:"전기차 충전",amount:100000,note:""},{id:14,cat:"교통",who:"화니",item:"셔틀버스",amount:13000,note:""},{id:15,cat:"교통",who:"고니",item:"K패스",amount:30000,note:""},{id:16,cat:"구독",who:"공동",item:"넷플릭스",amount:18500,note:""},{id:17,cat:"구독",who:"공동",item:"네이버",amount:4900,note:""},{id:18,cat:"구독",who:"고니",item:"삼케플",amount:7900,note:""},{id:19,cat:"구독",who:"화니",item:"삼케플",amount:7900,note:""}],living:[{id:1,item:"식비",amount:600000},{id:2,item:"생필품비",amount:100000},{id:3,item:"고양이비",amount:100000},{id:4,item:"경조사비",amount:400000}],allowance:[{id:1,item:"화니 용돈",amount:400000},{id:2,item:"고니 용돈",amount:400000}]};
 let asNid=10,plNid=100,tvNid=100,extraEditCtx=null,planEditCtx=null,editAssetId=null,editMemoIdx=-1,editCtx=null;
 
 function switchTab(n){document.querySelectorAll('.tb').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tc').forEach(x=>x.classList.remove('active'));document.querySelector(`.tb[data-tab="${n}"]`)?.classList.add('active');document.getElementById('tab-'+n)?.classList.add('active');}
@@ -220,39 +240,12 @@ function openModal(id){document.getElementById(id).classList.add('show');}
 (function(){const sel=document.getElementById('monthPicker');["2026-03","2026-02","2026-01","2025-12","2025-11","2025-10","2025-09"].forEach(m=>{const o=document.createElement('option');const[y,mo]=m.split('-');o.value=m;o.textContent=`${y}년 ${parseInt(mo)}월`;sel.appendChild(o);});sel.value="2026-02";sel.addEventListener('change',e=>loadMonth(e.target.value));})();
 document.querySelectorAll('.tb').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
 
-// ★★★ 잔액 계산 수정: balance 열에 유효값이 있으면 사용, 없으면 직접 계산 ★★★
 function getBal(arr){
-  if(!arr||!arr.length) return 0;
-  // 원본 순서대로 (id 순) 마지막 행의 balance를 확인
-  const sorted=arr.slice().sort((a,b)=>{
-    const da=new Date(a.date),db=new Date(b.date);
-    if(isNaN(da)||isNaN(db)) return (a.id||0)-(b.id||0);
-    if(da-db!==0) return da-db;
-    return (a.id||0)-(b.id||0);
-  });
-  // 마지막 항목의 balance가 유효하면 그대로 사용
-  const last=sorted[sorted.length-1];
-  if(last.balance && last.balance!==0) return last.balance;
-  // balance가 0인 경우: 유효한 balance를 가진 마지막 항목 찾기
-  for(let i=sorted.length-1;i>=0;i--){
-    if(sorted[i].balance && sorted[i].balance!==0) return sorted[i].balance;
-  }
-  // 모두 0이면 직접 계산: 이월/수입/입금은 양수, 나머지는 차감
-  let bal=0;
-  sorted.forEach(r=>{
-    if(r.amount<0) bal+=Math.abs(r.amount); // 음수 = 입금
-    else bal-=r.amount; // 양수 = 지출
-  });
+  if(!arr||!arr.length)return 0;
+  const sorted=arr.slice().sort((a,b)=>{const da=new Date(a.date),db=new Date(b.date);if(isNaN(da)||isNaN(db))return(a.id||0)-(b.id||0);if(da-db!==0)return da-db;return(a.id||0)-(b.id||0);});
+  for(let i=sorted.length-1;i>=0;i--){if(sorted[i].balance&&sorted[i].balance!==0)return sorted[i].balance;}
+  let bal=0;sorted.forEach(r=>{if(r.amount<0)bal+=Math.abs(r.amount);else bal-=r.amount;});
   return bal;
-}
-
-function filterExtraRows(rows){
-  return rows.filter(r=>{
-    if(!r.date && !r.category && r.detail==='기타 지출 비용') return false;
-    if(!r.date && !r.category) return false;
-    if(!r.category && r.amount===0 && r.balance===0) return false;
-    return true;
-  });
 }
 
 function render(){if(!D)return;renderOverview();renderFilteredTable('household');renderFilteredTable('goeun');renderFilteredTable('hyunghwan');
@@ -268,7 +261,6 @@ function renderCatBar(elId,key,data){const el=document.getElementById(elId);cons
 const total=Object.values(byCat).reduce((s,v)=>s+v,0);if(total===0){el.style.display='none';return;}
 el.style.display='flex';const curF=catFilters[key];
 el.innerHTML=Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([k,v])=>{const pct=(v/total*100).toFixed(0);const active=curF===k?' active':'';return`<div class="cat-bar-item${active}" onclick="toggleCatFilter('${key}','${k}')"><div class="cat-bar-dot" style="background:${CC[k]||'#6b7280'}"></div>${k} <span class="cat-bar-pct">${pct}%</span></div>`;}).join('');}
-
 function toggleCatFilter(key,cat){catFilters[key]=catFilters[key]===cat?null:cat;renderFilteredTable(key);const map={household:'catbar-household',goeun:'catbar-goeun',hyunghwan:'catbar-hyunghwan'};renderCatBar(map[key],key,D[key]);}
 
 function renderOverview(){
@@ -287,10 +279,9 @@ const byCat={};hh.filter(r=>r.amount>0).forEach(r=>{byCat[r.category]=(byCat[r.c
 document.getElementById('budgetGrid').innerHTML=(D.budget||[]).map((b,i)=>{
 const sp=byCat[b.category]||0;const p=b.budget>0?Math.min(sp/b.budget*100,120):0;const ov=sp>b.budget;
 const c=CC[b.category]||'#6366f1';const rc=ov?'background:#fef2f2;color:#dc2626':'background:#f0fdf4;color:#059669';
-const fh=b.formula?`<div class="budget-eval">${b.formula}</div>`:'';
 return`<div class="budget-card" onclick="openBudgetModalSingle(${i})"><div class="bc-header"><span class="bc-cat">${b.category}</span><span class="bc-rate" style="${rc}">${b.budget>0?p.toFixed(0)+'%':'-'}</span></div>
 <div class="bc-bar"><div class="bc-fill" style="width:${Math.min(p,100)}%;background:${ov?'#dc2626':c}"></div></div>
-<div class="bc-row"><span class="l">예산</span><span class="v">₩${fmt(b.budget)}</span></div>${fh}
+<div class="bc-row"><span class="l">예산</span><span class="v">₩${fmt(b.budget)}</span></div>
 <div class="bc-row"><span class="l">지출</span><span class="v" style="color:${ov?'#dc2626':'inherit'}">₩${fmt(sp)}</span></div>
 <div class="bc-row"><span class="l">잔액</span><span class="v" style="color:${sp>b.budget?'#dc2626':'#059669'}">₩${fmt(b.budget-sp)}</span></div>
 ${b.memo?`<div class="bc-memo">${b.memo}</div>`:''}</div>`;}).join('');
@@ -303,32 +294,24 @@ paths+=`<path d="M ${x1} ${y1} A ${r} ${r} 0 ${lg} 1 ${x2} ${y2}" fill="none" st
 paths+=`<text x="${cx}" y="${cy-4}" text-anchor="middle" fill="#111827" font-size="16" font-weight="700">₩${fmt(total)}</text><text x="${cx}" y="${cy+14}" text-anchor="middle" fill="#9ca3af" font-size="10">총 지출</text>`;
 document.getElementById('donutSvg').innerHTML=paths;
 document.getElementById('legend').innerHTML=entries.sort((a,b)=>b[1]-a[1]).map(([k,v])=>{const pct=(v/total*100).toFixed(0);return`<div class="li"><div class="ld" style="background:${CC[k]}"></div>${k} <span class="donut-legend-pct">${pct}%</span></div>`;}).join('');
-
 renderHouseholdMoM();}
 
 function renderHouseholdMoM(){
-const el=document.getElementById('assetSummaryArea');
-const months=Object.keys(ALL_DATA).sort();
-const ci=months.indexOf(curMonth);
-const prevMonth=ci>0?months[ci-1]:null;
-const prevD=prevMonth?ALL_DATA[prevMonth]:null;
-const curCats=['고정비','식비','생필품비','고양이비','가족비'];
-const curByCat={};D.household.filter(r=>r.amount>0).forEach(r=>{if(curCats.includes(r.category))curByCat[r.category]=(curByCat[r.category]||0)+r.amount;});
+const el=document.getElementById('assetSummaryArea');const months=Object.keys(ALL_DATA).sort();const ci=months.indexOf(curMonth);const prevMonth=ci>0?months[ci-1]:null;const prevD=prevMonth?ALL_DATA[prevMonth]:null;
+const curCats=['고정비','식비','생필품비','고양이비','가족비'];const curByCat={};D.household.filter(r=>r.amount>0).forEach(r=>{if(curCats.includes(r.category))curByCat[r.category]=(curByCat[r.category]||0)+r.amount;});
 const prevByCat={};if(prevD)prevD.household?.filter(r=>r.amount>0).forEach(r=>{if(curCats.includes(r.category))prevByCat[r.category]=(prevByCat[r.category]||0)+r.amount;});
 const chg=v=>v>0?`<span class="chg-pos">▲ +₩${fmt(v)}</span>`:v<0?`<span class="chg-neg">▼ -₩${fmt(Math.abs(v))}</span>`:`<span style="color:var(--t5);font-size:12px">—</span>`;
 const curT=curCats.reduce((s,c)=>s+(curByCat[c]||0),0),prevT=curCats.reduce((s,c)=>s+(prevByCat[c]||0),0);
 if(!prevD){el.innerHTML=`<div class="asset-summary"><div class="as-title">📊 이번 달 공동 가계부</div>${curCats.map(c=>`<div class="as-row"><span class="l">${c}</span><span class="v">₩${fmt(curByCat[c]||0)}</span></div>`).join('')}<div class="as-total"><span>합계</span><span class="v">₩${fmt(curT)}</span></div></div>`;return;}
-const mo=curMonth.split('-')[1];const pm=prevMonth.split('-')[1];
-el.innerHTML=`<div class="asset-summary"><div class="as-title">📈 전월 대비 공동 지출 변동 (${parseInt(pm)}월 → ${parseInt(mo)}월)</div>
-${curCats.map(c=>{const cur=curByCat[c]||0,prev=prevByCat[c]||0,d=cur-prev;return`<div class="as-row"><span class="l">${c}</span><span class="v">${chg(d)}</span></div>`;}).join('')}
-<div class="as-total"><span>합계 변동</span><span class="v">${chg(curT-prevT)}</span></div></div>`;}
+const mo=curMonth.split('-')[1],pm=prevMonth.split('-')[1];
+el.innerHTML=`<div class="asset-summary"><div class="as-title">📈 전월 대비 (${parseInt(pm)}월 → ${parseInt(mo)}월)</div>${curCats.map(c=>{const d=(curByCat[c]||0)-(prevByCat[c]||0);return`<div class="as-row"><span class="l">${c}</span><span class="v">${chg(d)}</span></div>`;}).join('')}<div class="as-total"><span>합계 변동</span><span class="v">${chg(curT-prevT)}</span></div></div>`;}
 
 function openBudgetModalSingle(i){const b=D.budget[i];
-document.getElementById('budgetModalFields').innerHTML=`<div style="margin-bottom:16px"><div style="font-size:15px;font-weight:600;color:var(--t2);margin-bottom:10px">${b.category}</div><div class="fg" style="grid-template-columns:1fr"><div><label>예산 <span style="font-size:11px;color:var(--t5)">(숫자 또는 =수식)</span></label><input id="bdg-formula" class="fi${b.formula?' formula-input':''}" value="${b.formula||b.budget}"></div><div id="bdg-eval-preview" style="font-size:13px;color:var(--accent);margin-top:4px"></div><div><label>메모</label><input id="bdg-memo-single" class="fi" value="${b.memo||''}" placeholder="메모"></div></div></div>`;
+document.getElementById('budgetModalFields').innerHTML=`<div style="margin-bottom:16px"><div style="font-size:15px;font-weight:600;margin-bottom:10px">${b.category}</div><div class="fg" style="grid-template-columns:1fr"><div><label>예산 <span style="font-size:11px;color:var(--t5)">(숫자 또는 =수식)</span></label><input id="bdg-formula" class="fi${b.formula?' formula-input':''}" value="${b.formula||b.budget}"></div><div id="bdg-eval-preview" style="font-size:13px;color:var(--accent);margin-top:4px"></div><div><label>메모</label><input id="bdg-memo-single" class="fi" value="${b.memo||''}" placeholder="메모"></div></div></div>`;
 const inp=document.getElementById('bdg-formula'),prev=document.getElementById('bdg-eval-preview');
 function up(){const v=inp.value.trim();if(v.startsWith('=')){prev.textContent='= ₩'+fmt(evalFormula(v));inp.classList.add('formula-input');}else{prev.textContent='';inp.classList.remove('formula-input');}}
 inp.addEventListener('input',up);up();
-document.getElementById('btnSaveBudget').onclick=function(){const raw=document.getElementById('bdg-formula').value.trim();b.budget=evalFormula(raw);b.formula=raw.startsWith('=')?raw:'';b.memo=document.getElementById('bdg-memo-single').value.trim();closeModal('budgetModal');render();};
+document.getElementById('btnSaveBudget').onclick=async function(){const raw=document.getElementById('bdg-formula').value.trim();b.budget=evalFormula(raw);b.formula=raw.startsWith('=')?raw:'';b.memo=document.getElementById('bdg-memo-single').value.trim();closeModal('budgetModal');render();await gasPost({action:'writeBudget',month:curMonth,budgets:D.budget});toast('예산 저장됨');};
 openModal('budgetModal');}
 
 function renderTable(key,data){document.getElementById('tbody-'+key).innerHTML=data.map(r=>{const c=CC[r.category]||'#6b7280';const inc=r.amount<0;return`<tr class="dr" onclick="openEditModal('${key}',${r.id})"><td style="color:var(--t4)">${fmtD(r.date)}</td><td><span class="ct" style="background:${c}15;color:${c}">${r.category}</span></td><td style="color:var(--t2);overflow:hidden;text-overflow:ellipsis">${r.detail}</td><td class="td-a${inc?' inc':''}">${inc?'+':''}${fmt(Math.abs(r.amount))}</td><td class="td-b">${fmt(r.balance)}</td><td class="td-n">${r.note}</td></tr>`;}).join('');}
@@ -340,8 +323,23 @@ document.getElementById('editModalTitle').textContent='항목 수정';
 document.getElementById('editModalFields').innerHTML=`<div><label>날짜</label><input type="date" id="em-date" class="fi" value="${row.date}"></div><div><label>항목</label><select id="em-cat" class="fi">${cats.map(c=>`<option${c===row.category?' selected':''}>${c}</option>`).join('')}</select></div><div><label>상세</label><input id="em-detail" class="fi" value="${row.detail}"></div><div><label>금액</label><input id="em-amount" class="fi fmt-num" value="${fmt(row.amount)}"></div><div style="grid-column:1/-1"><label>비고</label><input id="em-note" class="fi" value="${row.note||''}"></div>`;
 initFmtNum();
 document.getElementById('btnDeleteEdit').style.display='block';
-document.getElementById('btnDeleteEdit').onclick=()=>{D[editCtx.key]=D[editCtx.key].filter(r=>r.id!==editCtx.id);closeModal('editModal');editCtx=null;render();};
-document.getElementById('btnSaveEdit').onclick=()=>{if(!editCtx)return;const r=D[editCtx.key].find(x=>x.id===editCtx.id);if(!r)return;r.date=document.getElementById('em-date').value;r.category=document.getElementById('em-cat').value;r.detail=document.getElementById('em-detail').value;r.amount=parseFmtNum('em-amount');r.note=document.getElementById('em-note').value;closeModal('editModal');editCtx=null;render();};
+document.getElementById('btnDeleteEdit').onclick=async()=>{
+  const idx=D[editCtx.key].findIndex(r=>r.id===editCtx.id);
+  D[editCtx.key]=D[editCtx.key].filter(r=>r.id!==editCtx.id);
+  closeModal('editModal');render();
+  // 시트에서도 삭제
+  await gasPost({action:'deleteRow',month:curMonth,section:editCtx.key,who:editCtx.key,rowIndex:idx});
+  toast('삭제 후 시트 반영됨');
+  await refreshFromSheet(); // 시트 기준으로 새로고침
+};
+document.getElementById('btnSaveEdit').onclick=async()=>{
+  if(!editCtx)return;const r=D[editCtx.key].find(x=>x.id===editCtx.id);if(!r)return;
+  r.date=document.getElementById('em-date').value;r.category=document.getElementById('em-cat').value;r.detail=document.getElementById('em-detail').value;r.amount=parseFmtNum('em-amount');r.note=document.getElementById('em-note').value;
+  closeModal('editModal');render();
+  // 시트 반영 후 새로고침
+  toast('저장 중...','info');
+  await refreshFromSheet(); // 가장 안전: 시트 기준으로 전체 새로고침
+};
 openModal('editModal');}
 
 function openTravelEditModal(id){
@@ -354,30 +352,36 @@ document.getElementById('btnDeleteEdit').onclick=()=>{const i=sharedTravel.findI
 document.getElementById('btnSaveEdit').onclick=()=>{row.date=document.getElementById('em-tv-date').value;row.inp=parseFmtNum('em-tv-in');row.out=parseFmtNum('em-tv-out');row.detail=document.getElementById('em-tv-detail').value;closeModal('editModal');render();};
 openModal('editModal');}
 
-function initFmtNum(){document.querySelectorAll('.fmt-num').forEach(el=>{el.addEventListener('input',function(){const pos=this.selectionStart;const raw=this.value.replace(/[^0-9\-]/g,'');const n=parseInt(raw)||0;const formatted=n?n.toLocaleString('ko-KR'):'';const diff=formatted.length-this.value.length;this.value=formatted;this.setSelectionRange(pos+diff,pos+diff);});});}
+function initFmtNum(){document.querySelectorAll('.fmt-num').forEach(el=>{el.addEventListener('input',function(){const pos=this.selectionStart;const raw=this.value.replace(/[^0-9\-]/g,'');const n=parseInt(raw)||0;const f=n?n.toLocaleString('ko-KR'):'';const diff=f.length-this.value.length;this.value=f;this.setSelectionRange(pos+diff,pos+diff);});});}
 function parseFmtNum(id){return N(document.getElementById(id).value.replace(/[^0-9\-]/g,''));}
 
 function renderExtra(id,data,dk,title){const el=document.getElementById(id);const total=data?.reduce((s,d)=>s+d.amount,0)||0;
 el.innerHTML=`<div class="pn" style="margin-top:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:14px;color:var(--t4);font-weight:500">${title}</div><button class="ab" style="font-size:12px;padding:4px 10px" onclick="openExtraAdd('${dk}')">+ 추가</button></div>
 ${(data||[]).map((d,i)=>`<div class="er" onclick="openExtraEdit('${dk}',${i})"><span style="color:var(--t2)">${d.item}</span><span style="color:var(--yellow);font-weight:600">₩${fmt(d.amount)}</span></div>`).join('')}
 ${data?.length?`<div class="er" style="font-weight:700;border-top:2px solid var(--border);padding-top:8px;margin-top:4px;cursor:default"><span style="color:var(--t3)">합계</span><span style="color:var(--red)">₩${fmt(total)}</span></div>`:''}</div>`;}
-function openExtraAdd(dk){extraEditCtx={dataKey:dk,index:-1};document.getElementById('extraModalTitle').textContent='추가';document.getElementById('extraModalFields').innerHTML=`<div><label>항목</label><input id="ex-item" class="fi"></div><div><label>금액</label><input id="ex-amount" class="fi fmt-num"></div>`;initFmtNum();document.getElementById('btnDeleteExtra').style.display='none';openModal('extraModal');}
-function openExtraEdit(dk,idx){const item=D[dk][idx];if(!item)return;extraEditCtx={dataKey:dk,index:idx};document.getElementById('extraModalTitle').textContent='수정';document.getElementById('extraModalFields').innerHTML=`<div><label>항목</label><input id="ex-item" class="fi" value="${item.item}"></div><div><label>금액</label><input id="ex-amount" class="fi fmt-num" value="${fmt(item.amount)}"></div>`;initFmtNum();document.getElementById('btnDeleteExtra').style.display='block';document.getElementById('btnDeleteExtra').onclick=()=>{D[dk].splice(idx,1);closeModal('extraModal');render();};openModal('extraModal');}
-function saveExtra(){if(!extraEditCtx)return;const item=document.getElementById('ex-item').value.trim(),amount=parseFmtNum('ex-amount');if(!item)return;if(extraEditCtx.index>=0)D[extraEditCtx.dataKey][extraEditCtx.index]={item,amount};else{if(!D[extraEditCtx.dataKey])D[extraEditCtx.dataKey]=[];D[extraEditCtx.dataKey].push({item,amount});}closeModal('extraModal');extraEditCtx=null;render();}
 
-function renderTravel(){const d=sharedTravel;
-let runBal=0;d.forEach(r=>{runBal+=r.inp-r.out;r.balance=runBal;});
+function openExtraAdd(dk){extraEditCtx={dataKey:dk,index:-1};document.getElementById('extraModalTitle').textContent='기타 지출 추가';document.getElementById('extraModalFields').innerHTML=`<div><label>항목</label><input id="ex-item" class="fi"></div><div><label>금액</label><input id="ex-amount" class="fi fmt-num"></div>`;initFmtNum();document.getElementById('btnDeleteExtra').style.display='none';openModal('extraModal');}
+function openExtraEdit(dk,idx){const item=D[dk][idx];if(!item)return;extraEditCtx={dataKey:dk,index:idx};document.getElementById('extraModalTitle').textContent='기타 지출 수정';document.getElementById('extraModalFields').innerHTML=`<div><label>항목</label><input id="ex-item" class="fi" value="${item.item}"></div><div><label>금액</label><input id="ex-amount" class="fi fmt-num" value="${fmt(item.amount)}"></div>`;initFmtNum();document.getElementById('btnDeleteExtra').style.display='block';document.getElementById('btnDeleteExtra').onclick=()=>{D[dk].splice(idx,1);closeModal('extraModal');render();};openModal('extraModal');}
+async function saveExtra(){if(!extraEditCtx)return;const item=document.getElementById('ex-item').value.trim(),amount=parseFmtNum('ex-amount');if(!item)return;
+if(extraEditCtx.index>=0)D[extraEditCtx.dataKey][extraEditCtx.index]={item,amount};
+else{if(!D[extraEditCtx.dataKey])D[extraEditCtx.dataKey]=[];D[extraEditCtx.dataKey].push({item,amount});}
+closeModal('extraModal');render();
+// 시트에 기타지출 쓰기
+const who=extraEditCtx.dataKey==='goeunExtra'?'goeun':'hyunghwan';
+if(extraEditCtx.index<0){await gasPost({action:'writeExtra',month:curMonth,who,row:{item,amount}});toast('기타 지출 시트 저장됨');}
+extraEditCtx=null;}
+
+function renderTravel(){const d=sharedTravel;let runBal=0;d.forEach(r=>{runBal+=r.inp-r.out;r.balance=runBal;});
 const ti=d.reduce((s,r)=>s+r.inp,0),to=d.reduce((s,r)=>s+r.out,0),bal=d.length?d[d.length-1].balance:0;
 document.getElementById('travelBal').textContent=(bal<0?'-':'')+'₩'+fmt(Math.abs(bal));document.getElementById('travelBal').style.color=bal>=0?'var(--green)':'var(--red)';
 document.getElementById('travelIn').textContent='₩'+fmt(ti);document.getElementById('travelOut').textContent='₩'+fmt(to);
-const sorted=d.slice().reverse();
-document.getElementById('tbody-travel').innerHTML=sorted.map(r=>`<tr class="dr" onclick="openTravelEditModal(${r.id})"><td style="color:var(--t4)">${fmtD(r.date)}</td><td class="td-a${r.inp?' inc':''}">${r.inp?'+'+fmt(r.inp):''}</td><td class="td-a" style="color:var(--red)">${r.out?fmt(r.out):''}</td><td style="color:var(--t2)">${r.detail}</td><td class="td-b">${r.balance<0?'-':''}${fmt(Math.abs(r.balance))}</td></tr>`).join('');}
+document.getElementById('tbody-travel').innerHTML=d.slice().reverse().map(r=>`<tr class="dr" onclick="openTravelEditModal(${r.id})"><td style="color:var(--t4)">${fmtD(r.date)}</td><td class="td-a${r.inp?' inc':''}">${r.inp?'+'+fmt(r.inp):''}</td><td class="td-a" style="color:var(--red)">${r.out?fmt(r.out):''}</td><td style="color:var(--t2)">${r.detail}</td><td class="td-b">${r.balance<0?'-':''}${fmt(Math.abs(r.balance))}</td></tr>`).join('');}
 
 function sumA(o){return N(o.cash)+N(o.savings)+N(o.stock)+N(o.pension)+N(o.etc)}
 function renderAssets(){const el=document.getElementById('assetsList');const labels=['현금','청약','증권','연금','기타'],keys=['cash','savings','stock','pension','etc'];
 el.innerHTML=sharedAssets.map((a,ai)=>{const geT=sumA(a.goeun),hwT=sumA(a.hyunghwan),comb=geT+hwT;
 let combDiff='';if(ai<sharedAssets.length-1){const prev=sharedAssets[ai+1];const cd=comb-(sumA(prev.goeun)+sumA(prev.hyunghwan));combDiff=cd>0?`<span class="chg-pos">▲+₩${fmt(cd)}</span>`:cd<0?`<span class="chg-neg">▼-₩${fmt(Math.abs(cd))}</span>`:'';}
-return`<div class="pn" style="cursor:pointer" onclick="editAsset(${a.id})"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="pt" style="margin:0">📅 ${fmtD(a.period)}</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div class="ac"><div style="font-size:14px;color:var(--pink);font-weight:600;margin-bottom:10px">🧶 고은</div>${keys.map((k,i)=>a.goeun[k]?`<div class="ar"><span style="color:var(--t4)">${labels[i]}</span><span style="font-weight:600">₩${fmt(a.goeun[k])}</span></div>`:'').join('')}<div class="ar" style="font-weight:700;border-top:2px solid var(--border);padding-top:6px;margin-top:4px"><span>소계</span><span style="color:var(--accent)">₩${fmt(geT)}</span></div></div><div class="ac"><div style="font-size:14px;color:var(--blue);font-weight:600;margin-bottom:10px">🎮 형환</div>${keys.map((k,i)=>a.hyunghwan[k]?`<div class="ar"><span style="color:var(--t4)">${labels[i]}</span><span style="font-weight:600">₩${fmt(a.hyunghwan[k])}</span></div>`:'').join('')}<div class="ar" style="font-weight:700;border-top:2px solid var(--border);padding-top:6px;margin-top:4px"><span>소계</span><span style="color:var(--accent)">₩${fmt(hwT)}</span></div></div></div><div style="display:flex;gap:20px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:15px;flex-wrap:wrap"><div><span style="color:var(--t4)">합산: </span><span style="font-weight:700">₩${fmt(comb)}</span> ${combDiff}</div><div><span style="color:var(--t4)">총자산: </span><span style="color:var(--green);font-weight:700">₩${fmt(comb+N(a.deposit))}</span></div></div></div>`;}).join('');}
+return`<div class="pn" style="cursor:pointer" onclick="editAsset(${a.id})"><div class="pt" style="margin-bottom:14px">📅 ${fmtD(a.period)}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div class="ac"><div style="font-size:14px;color:var(--pink);font-weight:600;margin-bottom:10px">🧶 고은</div>${keys.map((k,i)=>a.goeun[k]?`<div class="ar"><span style="color:var(--t4)">${labels[i]}</span><span style="font-weight:600">₩${fmt(a.goeun[k])}</span></div>`:'').join('')}<div class="ar" style="font-weight:700;border-top:2px solid var(--border);padding-top:6px;margin-top:4px"><span>소계</span><span style="color:var(--accent)">₩${fmt(geT)}</span></div></div><div class="ac"><div style="font-size:14px;color:var(--blue);font-weight:600;margin-bottom:10px">🎮 형환</div>${keys.map((k,i)=>a.hyunghwan[k]?`<div class="ar"><span style="color:var(--t4)">${labels[i]}</span><span style="font-weight:600">₩${fmt(a.hyunghwan[k])}</span></div>`:'').join('')}<div class="ar" style="font-weight:700;border-top:2px solid var(--border);padding-top:6px;margin-top:4px"><span>소계</span><span style="color:var(--accent)">₩${fmt(hwT)}</span></div></div></div><div style="display:flex;gap:20px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:15px;flex-wrap:wrap"><div><span style="color:var(--t4)">합산: </span><span style="font-weight:700">₩${fmt(comb)}</span> ${combDiff}</div><div><span style="color:var(--t4)">총자산: </span><span style="color:var(--green);font-weight:700">₩${fmt(comb+N(a.deposit))}</span></div></div></div>`;}).join('');}
 
 function openAssetForm(data){editAssetId=data?data.id:null;document.getElementById('assetModalTitle').textContent=data?'💎 수정':'💎 추가';document.getElementById('as-period').value=data?data.period:'';['cash','sav','stk','pen','etc'].forEach((k,i)=>{const ks=['cash','savings','stock','pension','etc'];document.getElementById('as-ge-'+k).value=data?data.goeun[ks[i]]||'':'';document.getElementById('as-hw-'+k).value=data?data.hyunghwan[ks[i]]||'':'';});document.getElementById('as-deposit').value=data?data.deposit:350000000;openModal('assetModal');}
 function editAsset(id){const a=sharedAssets.find(x=>x.id===id);if(a)openAssetForm(a);}
@@ -396,11 +400,46 @@ function renderMemos(){document.getElementById('memoList').innerHTML=(D.memos||[
 function addMemo(){editMemoIdx=-1;document.getElementById('memoInput').value='';document.getElementById('memoForm').style.display='block';document.getElementById('memoInput').focus();}
 function editMemo(i){editMemoIdx=i;document.getElementById('memoInput').value=D.memos[i];document.getElementById('memoForm').style.display='block';document.getElementById('memoInput').focus();}
 function cancelMemo(){document.getElementById('memoForm').style.display='none';editMemoIdx=-1;}
-function saveMemo(){const v=document.getElementById('memoInput').value.trim();if(!v)return;if(!D.memos)D.memos=[];if(editMemoIdx>=0)D.memos[editMemoIdx]=v;else D.memos.push(v);cancelMemo();renderMemos();}
+async function saveMemo(){const v=document.getElementById('memoInput').value.trim();if(!v)return;if(!D.memos)D.memos=[];if(editMemoIdx>=0)D.memos[editMemoIdx]=v;else D.memos.push(v);cancelMemo();renderMemos();await gasPost({action:'writeMemo',month:curMonth,memos:D.memos});toast('메모 저장됨');}
 
 function toggleForm(k){document.getElementById('form-'+k).classList.toggle('show');}
-function addItem(key){const p=key==='household'?'hh':key==='goeun'?'ge':'hw';const date=document.getElementById(p+'-date').value,cat=document.getElementById(p+'-cat').value,detail=document.getElementById(p+'-detail').value,amount=N(document.getElementById(p+'-amount').value),note=document.getElementById(p+'-note').value;if(!date||!cat)return;const lastBal=getBal(D[key]);D[key].push({id:nid[key]++,date,category:cat,detail,amount,balance:lastBal-amount,note});document.getElementById(p+'-detail').value='';document.getElementById(p+'-amount').value='';document.getElementById(p+'-note').value='';document.getElementById(p+'-cat').selectedIndex=0;toggleForm(key);render();}
-function addTravel(){const date=document.getElementById('tv-date').value,inp=N(document.getElementById('tv-in').value),out=N(document.getElementById('tv-out').value),detail=document.getElementById('tv-detail').value;if(!date)return;const lb=sharedTravel.length?sharedTravel[sharedTravel.length-1].balance:0;sharedTravel.push({id:tvNid++,date,inp,out,detail,balance:lb+inp-out});document.getElementById('tv-date').value='';document.getElementById('tv-in').value='';document.getElementById('tv-out').value='';document.getElementById('tv-detail').value='';toggleForm('travel');render();}
+
+// ★★★ 추가 시 자동으로 시트에 쓰기 ★★★
+async function addItem(key){
+  const p=key==='household'?'hh':key==='goeun'?'ge':'hw';
+  const date=document.getElementById(p+'-date').value,cat=document.getElementById(p+'-cat').value,detail=document.getElementById(p+'-detail').value,amount=N(document.getElementById(p+'-amount').value),note=document.getElementById(p+'-note').value;
+  if(!date||!cat)return;
+  const lastBal=getBal(D[key]);
+  const newRow={id:nid[key]++,date,category:cat,detail,amount,balance:lastBal-amount,note};
+  D[key].push(newRow);
+  document.getElementById(p+'-detail').value='';document.getElementById(p+'-amount').value='';document.getElementById(p+'-note').value='';document.getElementById(p+'-cat').selectedIndex=0;
+  toggleForm(key);render();
+
+  // 시트에 자동 쓰기
+  toast('시트에 저장 중...','info');
+  if(key==='household'){
+    await gasPost({action:'writeHousehold',month:curMonth,row:{date,category:cat,detail,amount,balance:lastBal-amount,note}});
+  }else{
+    const who=key;
+    await gasPost({action:'writePersonal',month:curMonth,who,row:{date,category:cat,detail,amount,balance:lastBal-amount,note}});
+  }
+  toast('✓ 시트에 저장됨');
+  // 시트에서 최신 데이터로 갱신 (잔액 수식 반영)
+  await refreshFromSheet();
+}
+
+async function addTravel(){
+  const date=document.getElementById('tv-date').value,inp=N(document.getElementById('tv-in').value),out=N(document.getElementById('tv-out').value),detail=document.getElementById('tv-detail').value;
+  if(!date)return;
+  const lb=sharedTravel.length?sharedTravel[sharedTravel.length-1].balance:0;
+  const bal=lb+inp-out;
+  sharedTravel.push({id:tvNid++,date,inp,out,detail,balance:bal});
+  document.getElementById('tv-date').value='';document.getElementById('tv-in').value='';document.getElementById('tv-out').value='';document.getElementById('tv-detail').value='';
+  toggleForm('travel');render();
+  toast('시트에 저장 중...','info');
+  await gasPost({action:'writeTravel',row:{date,inp,out,detail,balance:bal}});
+  toast('✓ 여행저금통 저장됨');
+}
 
 // Event listeners
 document.getElementById('btnAddMemo').onclick=addMemo;document.getElementById('btnCancelMemo').onclick=cancelMemo;document.getElementById('btnSaveMemo').onclick=saveMemo;
@@ -414,117 +453,50 @@ document.getElementById('btnClosePlan').onclick=()=>closeModal('planModal');docu
 document.getElementById('btnCloseBudget').onclick=()=>closeModal('budgetModal');
 document.getElementById('btnCloseExtra').onclick=()=>closeModal('extraModal');document.getElementById('btnSaveExtra').onclick=saveExtra;
 document.getElementById('btnCloseEdit').onclick=()=>closeModal('editModal');
+['assetModal','planModal','budgetModal','extraModal','editModal'].forEach(id=>{document.getElementById(id).onclick=e=>{if(e.target===e.currentTarget)e.target.classList.remove('show');};});
 
-['assetModal','planModal','budgetModal','extraModal','editModal','actionModal'].forEach(id=>{document.getElementById(id).onclick=e=>{if(e.target===e.currentTarget)e.target.classList.remove('show');};});
-
-// ★★★ 동기화: getAllData 단일 호출로 변경 ★★★
-let GAS_URL=HARDCODED_GAS_URL;
-function slog(m){const el=document.getElementById('syncLog');el.innerHTML=`<div>[${new Date().toLocaleTimeString('ko-KR')}] ${m}</div>`+el.innerHTML;}
-function showBanner(msg,type){
-  const el=document.getElementById('autoSyncBanner');
-  el.innerHTML=`<div class="auto-sync-banner ${type||''}">${msg}</div>`;
-  if(type!=='error'&&type!=='loading') setTimeout(()=>{el.innerHTML='';},5000);
-}
-
-document.getElementById('gasUrl').value=GAS_URL;
-
+// ★★★ 시트 데이터 적용 ★★★
 function applyAllData(result){
-  const months=result.months||[];
-  const md=result.monthData||{};
-
-  // 월별 데이터 적용
+  const months=result.months||[];const md=result.monthData||{};
   for(const m of months){
-    const res=md[m];
-    if(!res||res.error) continue;
-    if(!ALL_DATA[m]) ALL_DATA[m]={household:[],goeun:[],hyunghwan:[],budget:[],goeunExtra:[],hyunghwanExtra:[],memos:[]};
+    const res=md[m];if(!res||res.error)continue;
+    if(!ALL_DATA[m])ALL_DATA[m]={household:[],goeun:[],hyunghwan:[],budget:[],goeunExtra:[],hyunghwanExtra:[],memos:[]};
     const d=ALL_DATA[m];
-    if(res.household?.length){d.household=filterExtraRows(res.household).map((r,i)=>({id:i+1,...r}));}
-    if(res.goeun?.length){d.goeun=filterExtraRows(res.goeun).map((r,i)=>({id:i+1,...r}));}
-    if(res.hyunghwan?.length){d.hyunghwan=filterExtraRows(res.hyunghwan).map((r,i)=>({id:i+1,...r}));}
+    // ★ 기타지출 항목은 GAS에서 이미 분리되어 옴 → filterExtraRows 불필요
+    if(res.household?.length) d.household=res.household.map((r,i)=>({id:i+1,...r}));
+    if(res.goeun?.length) d.goeun=res.goeun.map((r,i)=>({id:i+1,...r}));
+    if(res.hyunghwan?.length) d.hyunghwan=res.hyunghwan.map((r,i)=>({id:i+1,...r}));
     if(res.budget?.length) d.budget=res.budget;
-    if(res.goeunExtra?.length) d.goeunExtra=res.goeunExtra;
-    if(res.hyunghwanExtra?.length) d.hyunghwanExtra=res.hyunghwanExtra;
+    if(res.goeunExtra) d.goeunExtra=res.goeunExtra;
+    if(res.hyunghwanExtra) d.hyunghwanExtra=res.hyunghwanExtra;
     if(res.memos?.length) d.memos=res.memos;
-    slog('  ✅ '+m+' 로드 완료');
   }
-
-  // 여행저금통
-  if(result.travel?.length){
-    sharedTravel.length=0;
-    result.travel.forEach((r,i)=>sharedTravel.push({id:i+1,...r}));
-    slog('  ✅ 여행 '+result.travel.length+'건');
-  }
-
-  // 자금현황
-  if(result.assets?.length){
-    sharedAssets.length=0;
-    result.assets.forEach((a,i)=>sharedAssets.push({id:i+1,...a}));
-    slog('  ✅ 자금 '+result.assets.length+'건');
-  }
-
+  if(result.travel?.length){sharedTravel.length=0;result.travel.forEach((r,i)=>sharedTravel.push({id:i+1,...r}));}
+  if(result.assets?.length){sharedAssets.length=0;result.assets.forEach((a,i)=>sharedAssets.push({id:i+1,...a}));}
   // 월 선택기 업데이트
   if(months.length){
-    const sel=document.getElementById('monthPicker');
-    const sorted=months.slice().sort().reverse();
-    sel.innerHTML='';
-    sorted.forEach(m=>{
-      const o=document.createElement('option');
-      const[y,mo]=m.split('-');
-      o.value=m;o.textContent=`${y}년 ${parseInt(mo)}월`;
-      sel.appendChild(o);
-    });
-    // 현재 월이 목록에 있으면 유지, 없으면 최신 월
-    if(months.includes(curMonth)){sel.value=curMonth;}
-    else{curMonth=sorted[0];sel.value=curMonth;}
+    const sel=document.getElementById('monthPicker');const sorted=months.slice().sort().reverse();
+    sel.innerHTML='';sorted.forEach(m=>{const o=document.createElement('option');const[y,mo]=m.split('-');o.value=m;o.textContent=`${y}년 ${parseInt(mo)}월`;sel.appendChild(o);});
+    if(months.includes(curMonth))sel.value=curMonth;else{curMonth=sorted[0];sel.value=curMonth;}
   }
-
   loadMonth(curMonth);
 }
 
-async function autoSync(){
-  if(!GAS_URL)return;
-  showBanner('⏳ 시트에서 데이터를 불러오는 중...','loading');
-  document.getElementById('syncStatus').innerHTML='⏳ 자동 연결 중...';
-  const t0=performance.now();
-
-  try{
-    // ★ 단일 API 호출로 모든 데이터 가져오기
-    const result=await fetch(GAS_URL+'?action=getAllData',{redirect:'follow'}).then(r=>r.json());
-
-    if(result.error){
-      showBanner('❌ 연결 실패: '+result.error,'error');
-      return;
-    }
-
-    const elapsed=((performance.now()-t0)/1000).toFixed(1);
-    document.getElementById('syncStatus').innerHTML=`<span style="color:var(--green)">✅ 연결됨 (${elapsed}초)</span>`;
-    slog(`✅ getAllData 단일 호출 완료 (${elapsed}초)`);
-
-    applyAllData(result);
-
-    showBanner(`✅ 시트 데이터 로드 완료 (${elapsed}초)`,'');
-  }catch(e){
-    slog('❌ 자동 연동 오류: '+e.message);
-    showBanner('❌ 자동 연동 실패: '+e.message,'error');
-    document.getElementById('syncStatus').innerHTML='<span style="color:var(--red)">❌ 자동 연결 실패</span>';
-    // 폴백: 빈 데이터라도 렌더
-    if(!ALL_DATA[curMonth]) ALL_DATA[curMonth]={household:[],goeun:[],hyunghwan:[],budget:[],goeunExtra:[],hyunghwanExtra:[],memos:[]};
-    loadMonth(curMonth);
-  }
-}
-
-// 페이지 로드 시 즉시 빈 화면 방지 → 바로 렌더 후 비동기 로드
-if(!ALL_DATA[curMonth]) ALL_DATA[curMonth]={household:[],goeun:[],hyunghwan:[],budget:[],goeunExtra:[],hyunghwanExtra:[],memos:[]};
+// ★ 초기 로드
+if(!ALL_DATA[curMonth])ALL_DATA[curMonth]={household:[],goeun:[],hyunghwan:[],budget:[],goeunExtra:[],hyunghwanExtra:[],memos:[]};
 loadMonth(curMonth);
-autoSync();
 
-document.getElementById('btnConnect').onclick=()=>{GAS_URL=document.getElementById('gasUrl').value.trim();if(!GAS_URL)return;autoSync();};
-
-// 수동 시트→앱 (역시 getAllData 사용)
-document.getElementById('btnPull').onclick=async()=>{if(!GAS_URL)return;slog('📥 수동 불러오기 시작...');document.getElementById('btnPull').textContent='⏳ 불러오는 중...';try{const result=await fetch(GAS_URL+'?action=getAllData',{redirect:'follow'}).then(r=>r.json());if(result.error){slog('❌ '+result.error);}else{applyAllData(result);slog('✅ 불러오기 완료!');};}catch(e){slog('❌ 오류: '+e.message);}document.getElementById('btnPull').textContent='📥 시트→앱';};
-
-// 수동 앱→시트
-document.getElementById('btnPush').onclick=async()=>{if(!GAS_URL||!D)return;slog('📤 '+curMonth+' 저장 시작...');document.getElementById('btnPush').textContent='⏳ 저장 중...';try{const post=b=>fetch(GAS_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(b)}).then(r=>r.json());for(const row of D.household)await post({action:'writeHousehold',month:curMonth,row:{date:row.date,category:row.category,detail:row.detail,amount:row.amount,balance:row.balance,note:row.note}});slog('  ✅ 가계부 '+D.household.length+'건');for(const row of D.goeun)await post({action:'writePersonal',month:curMonth,who:'goeun',row:{date:row.date,category:row.category,detail:row.detail,amount:row.amount,balance:row.balance,note:row.note}});slog('  ✅ 고은 '+D.goeun.length+'건');for(const row of D.hyunghwan)await post({action:'writePersonal',month:curMonth,who:'hyunghwan',row:{date:row.date,category:row.category,detail:row.detail,amount:row.amount,balance:row.balance,note:row.note}});slog('  ✅ 형환 '+D.hyunghwan.length+'건');await post({action:'writeBudget',month:curMonth,budgets:D.budget});slog('  ✅ 예산');if(D.memos?.length){await post({action:'writeMemo',month:curMonth,memos:D.memos});slog('  ✅ 메모');}slog('✅ 저장 완료!');}catch(e){slog('❌ 오류: '+e.message);}document.getElementById('btnPush').textContent='📤 앱→시트';};
+(async()=>{
+  setSyncBadge('syncing');
+  toast('시트에서 데이터 불러오는 중...','info');
+  try{
+    const result=await fetch(GAS_URL+'?action=getAllData',{redirect:'follow'}).then(r=>r.json());
+    if(result.error){setSyncBadge('err');toast('연결 실패: '+result.error,'err');return;}
+    applyAllData(result);
+    setSyncBadge('ok');
+    toast('✓ 시트 데이터 로드 완료');
+  }catch(e){setSyncBadge('err');toast('연결 오류: '+e.message,'err');}
+})();
 </script>
 </body>
 </html>
