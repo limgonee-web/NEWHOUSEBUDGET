@@ -240,7 +240,28 @@ function openModal(id){document.getElementById(id).classList.add('show');}
 (function(){const sel=document.getElementById('monthPicker');["2026-02","2026-01","2025-12","2025-11","2025-10","2025-09"].forEach(m=>{const o=document.createElement('option');const[y,mo]=m.split('-');o.value=m;o.textContent=`${y}년 ${mo}월`;sel.appendChild(o);});sel.value="2026-02";sel.addEventListener('change',e=>loadMonth(e.target.value));})();
 document.querySelectorAll('.tb').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
 
-function getBal(arr){const s=arr.slice().sort((a,b)=>new Date(a.date)-new Date(b.date));return s.length?s[s.length-1].balance:0;}
+function getBal(arr){
+  // 이월/수입 항목의 금액(음수=입금)을 합산하고, 지출 항목을 차감하여 잔액 계산
+  // 데이터의 마지막 balance 값을 사용
+  const s=arr.slice().sort((a,b)=>{
+    const da=new Date(a.date),db=new Date(b.date);
+    if(da-db!==0)return da-db;
+    return a.id-b.id;
+  });
+  return s.length?s[s.length-1].balance:0;
+}
+
+// 시트에서 불러온 데이터에서 "기타 지출 비용" 관련 행 필터링
+function filterExtraRows(rows){
+  return rows.filter(r=>{
+    // "기타 지출 비용" 헤더행이나 하위 항목 제거
+    if(!r.date && !r.category && r.detail==='기타 지출 비용') return false;
+    if(!r.date && !r.category) return false;
+    // amount와 balance가 둘 다 0이고 category가 없는 행 제거
+    if(!r.category && r.amount===0 && r.balance===0) return false;
+    return true;
+  });
+}
 
 function render(){if(!D)return;renderOverview();renderFilteredTable('household');renderFilteredTable('goeun');renderFilteredTable('hyunghwan');
 document.getElementById('hhMainBal').textContent='잔액: ₩'+fmt(getBal(D.household));
@@ -431,9 +452,9 @@ async function autoSync(){
       if(res.error){slog('  ❌ '+m+': '+res.error);continue;}
       if(!ALL_DATA[m])ALL_DATA[m]={household:[],goeun:[],hyunghwan:[],budget:[],goeunExtra:[],hyunghwanExtra:[],memos:[]};
       const md=ALL_DATA[m];
-      if(res.household?.length){md.household=res.household.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 가계부 '+res.household.length+'건');}
-      if(res.goeun?.length){md.goeun=res.goeun.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 고은 '+res.goeun.length+'건');}
-      if(res.hyunghwan?.length){md.hyunghwan=res.hyunghwan.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 형환 '+res.hyunghwan.length+'건');}
+      if(res.household?.length){const filtered=filterExtraRows(res.household);md.household=filtered.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 가계부 '+filtered.length+'건');}
+      if(res.goeun?.length){const filtered=filterExtraRows(res.goeun);md.goeun=filtered.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 고은 '+filtered.length+'건');}
+      if(res.hyunghwan?.length){const filtered=filterExtraRows(res.hyunghwan);md.hyunghwan=filtered.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 형환 '+filtered.length+'건');}
       if(res.budget?.length)md.budget=res.budget;
       if(res.goeunExtra?.length)md.goeunExtra=res.goeunExtra;
       if(res.hyunghwanExtra?.length)md.hyunghwanExtra=res.hyunghwanExtra;
@@ -460,7 +481,7 @@ autoSync();
 document.getElementById('btnConnect').onclick=()=>{GAS_URL=document.getElementById('gasUrl').value.trim();if(!GAS_URL)return;autoSync();};
 
 // 수동 시트→앱
-document.getElementById('btnPull').onclick=async()=>{if(!GAS_URL)return;slog('📥 수동 불러오기 시작...');document.getElementById('btnPull').textContent='⏳ 불러오는 중...';try{const mr=await fetch(GAS_URL+'?action=getMonths',{redirect:'follow'}).then(r=>r.json());for(const m of(mr.months||[])){slog('  📄 '+m+' 요청 중...');const res=await fetch(GAS_URL+'?action=getMonth&month='+m,{redirect:'follow'}).then(r=>r.json());if(res.error){slog('  ❌ '+m+': '+res.error);continue;}if(!ALL_DATA[m])ALL_DATA[m]={household:[],goeun:[],hyunghwan:[],budget:[],goeunExtra:[],hyunghwanExtra:[],memos:[]};const md=ALL_DATA[m];if(res.household?.length){md.household=res.household.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 가계부 '+res.household.length+'건');}if(res.goeun?.length){md.goeun=res.goeun.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 고은 '+res.goeun.length+'건');}if(res.hyunghwan?.length){md.hyunghwan=res.hyunghwan.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 형환 '+res.hyunghwan.length+'건');}if(res.budget?.length)md.budget=res.budget;if(res.goeunExtra?.length)md.goeunExtra=res.goeunExtra;if(res.hyunghwanExtra?.length)md.hyunghwanExtra=res.hyunghwanExtra;if(res.memos?.length)md.memos=res.memos;}slog('  ✈️ 여행저금통...');const tv=await fetch(GAS_URL+'?action=getTravel',{redirect:'follow'}).then(r=>r.json());if(tv.travel?.length){sharedTravel.length=0;tv.travel.forEach((r,i)=>sharedTravel.push({id:i+1,...r}));slog('  ✅ 여행 '+tv.travel.length+'건');}slog('  💎 자금현황...');const as=await fetch(GAS_URL+'?action=getAssets',{redirect:'follow'}).then(r=>r.json());if(as.assets?.length){sharedAssets.length=0;as.assets.forEach((a,i)=>sharedAssets.push({id:i+1,...a}));slog('  ✅ 자금 '+as.assets.length+'건');}loadMonth(curMonth);slog('✅ 불러오기 완료!');}catch(e){slog('❌ 오류: '+e.message);}document.getElementById('btnPull').textContent='📥 시트→앱';};
+document.getElementById('btnPull').onclick=async()=>{if(!GAS_URL)return;slog('📥 수동 불러오기 시작...');document.getElementById('btnPull').textContent='⏳ 불러오는 중...';try{const mr=await fetch(GAS_URL+'?action=getMonths',{redirect:'follow'}).then(r=>r.json());for(const m of(mr.months||[])){slog('  📄 '+m+' 요청 중...');const res=await fetch(GAS_URL+'?action=getMonth&month='+m,{redirect:'follow'}).then(r=>r.json());if(res.error){slog('  ❌ '+m+': '+res.error);continue;}if(!ALL_DATA[m])ALL_DATA[m]={household:[],goeun:[],hyunghwan:[],budget:[],goeunExtra:[],hyunghwanExtra:[],memos:[]};const md=ALL_DATA[m];if(res.household?.length){const filtered=filterExtraRows(res.household);md.household=filtered.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 가계부 '+filtered.length+'건');}if(res.goeun?.length){const filtered=filterExtraRows(res.goeun);md.goeun=filtered.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 고은 '+filtered.length+'건');}if(res.hyunghwan?.length){const filtered=filterExtraRows(res.hyunghwan);md.hyunghwan=filtered.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 형환 '+filtered.length+'건');}if(res.budget?.length)md.budget=res.budget;if(res.goeunExtra?.length)md.goeunExtra=res.goeunExtra;if(res.hyunghwanExtra?.length)md.hyunghwanExtra=res.hyunghwanExtra;if(res.memos?.length)md.memos=res.memos;}slog('  ✈️ 여행저금통...');const tv=await fetch(GAS_URL+'?action=getTravel',{redirect:'follow'}).then(r=>r.json());if(tv.travel?.length){sharedTravel.length=0;tv.travel.forEach((r,i)=>sharedTravel.push({id:i+1,...r}));slog('  ✅ 여행 '+tv.travel.length+'건');}slog('  💎 자금현황...');const as=await fetch(GAS_URL+'?action=getAssets',{redirect:'follow'}).then(r=>r.json());if(as.assets?.length){sharedAssets.length=0;as.assets.forEach((a,i)=>sharedAssets.push({id:i+1,...a}));slog('  ✅ 자금 '+as.assets.length+'건');}loadMonth(curMonth);slog('✅ 불러오기 완료!');}catch(e){slog('❌ 오류: '+e.message);}document.getElementById('btnPull').textContent='📥 시트→앱';};
 
 // 수동 앱→시트
 document.getElementById('btnPush').onclick=async()=>{if(!GAS_URL||!D)return;slog('📤 '+curMonth+' 저장 시작...');document.getElementById('btnPush').textContent='⏳ 저장 중...';try{const post=b=>fetch(GAS_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(b)}).then(r=>r.json());for(const row of D.household)await post({action:'writeHousehold',month:curMonth,row:{date:row.date,category:row.category,detail:row.detail,amount:row.amount,balance:row.balance,note:row.note}});slog('  ✅ 가계부 '+D.household.length+'건');for(const row of D.goeun)await post({action:'writePersonal',month:curMonth,who:'goeun',row:{date:row.date,category:row.category,detail:row.detail,amount:row.amount,balance:row.balance,note:row.note}});slog('  ✅ 고은 '+D.goeun.length+'건');for(const row of D.hyunghwan)await post({action:'writePersonal',month:curMonth,who:'hyunghwan',row:{date:row.date,category:row.category,detail:row.detail,amount:row.amount,balance:row.balance,note:row.note}});slog('  ✅ 형환 '+D.hyunghwan.length+'건');await post({action:'writeBudget',month:curMonth,budgets:D.budget});slog('  ✅ 예산');if(D.memos?.length){await post({action:'writeMemo',month:curMonth,memos:D.memos});slog('  ✅ 메모');}slog('✅ 저장 완료!');}catch(e){slog('❌ 오류: '+e.message);}document.getElementById('btnPush').textContent='📤 앱→시트';};
