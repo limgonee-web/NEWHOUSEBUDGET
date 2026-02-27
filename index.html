@@ -134,7 +134,13 @@ const CC={"입금":"#059669","고정비":"#6366f1","식비":"#d97706","생필품
 const fmt=n=>(n==null||isNaN(n))?"0":Math.abs(n).toLocaleString("ko-KR");
 const signed=n=>{if(n==null||isNaN(n)||n===0)return'₩0';return(n<0?'-':'')+'₩'+fmt(n);};
 const N=n=>Number(n)||0;
-function fmtD(d){if(!d)return"";const s=String(d).trim();if(/^\d{4}-\d{2}(-\d{2})?$/.test(s))return s;const m=s.match(/(\d{4})[-.\s]*(\d{1,2})[-.\s]*(\d{1,2})/);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');return s;}
+function fmtD(d){if(!d)return"";const s=String(d).trim();
+if(/^\d{4}-\d{2}(-\d{2})?$/.test(s))return s;
+const gm=s.match(/Date\((\d{4}),(\d+),(\d+)\)/);
+if(gm)return gm[1]+'-'+String(Number(gm[2])+1).padStart(2,'0')+'-'+gm[3].padStart(2,'0');
+if(!isNaN(Date.parse(s))){const dt=new Date(s);if(dt.getFullYear()>1970)return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}
+const m=s.match(/(\d{4})[-.\s/]*(\d{1,2})[-.\s/]*(\d{1,2})/);
+if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');return s;}
 function evalFormula(s){if(typeof s==='number')return s;if(typeof s!=='string')return N(s);s=s.trim();if(s.startsWith('=')){try{return N(eval(s.slice(1).replace(/[^0-9+\-*/.() ]/g,'')));}catch{return 0;}}return N(s);}
 function toast(m,t='ok'){const e=$('toast');e.textContent=m;e.className='toast '+t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),3000);}
 function setBadge(s){const b=$('syncBadge');b.textContent=s==='ok'?'✓ 연결됨':s==='busy'?'↻ 동기화중':'✗ 오류';b.className='sync-ind '+s;}
@@ -258,7 +264,7 @@ function openExtraAdd(dk){extraEditCtx={dk,i:-1};$('extraModalTitle').textConten
 function openExtraEdit(dk,i){const it=D[dk][i];if(!it)return;extraEditCtx={dk,i};$('extraModalTitle').textContent='기타 지출 수정';$('extraModalFields').innerHTML=`<div><label>항목</label><input id="ex-item" class="fi" value="${it.item}"></div><div><label>금액</label><input id="ex-amt" class="fi" value="${it.amount}" placeholder="0 또는 =수식"></div>`;$('btnDeleteExtra').style.display='block';$('btnDeleteExtra').onclick=async()=>{D[dk].splice(i,1);closeModal('extraModal');render();const who=dk==='goeunExtra'?'고은':'형환';await gasPost({action:'syncExtra',month:curMonth,who,items:D[dk]});toast('기타지출 삭제 반영됨');};openModal('extraModal');}
 $('btnSaveExtra').onclick=async()=>{if(!extraEditCtx)return;const item=$('ex-item').value.trim(),amount=evalFormula($('ex-amt').value);if(!item)return;const{dk,i}=extraEditCtx;if(i>=0)D[dk][i]={item,amount};else{if(!D[dk])D[dk]=[];D[dk].push({item,amount});}closeModal('extraModal');render();const who=dk==='goeunExtra'?'고은':'형환';await gasPost({action:'syncExtra',month:curMonth,who,items:D[dk]});toast('기타지출 저장됨');extraEditCtx=null;};
 
-function renderTravel(){const d=sharedTravel;let b=0;d.forEach(r=>{b+=r.inp-r.out;r.balance=b;});
+function renderTravel(){sharedTravel.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.id||0)-(b.id||0));const d=sharedTravel;let b=0;d.forEach(r=>{b+=r.inp-r.out;r.balance=b;});
 const ti=d.reduce((s,r)=>s+r.inp,0),to=d.reduce((s,r)=>s+r.out,0),bal=d.length?d[d.length-1].balance:0;
 $('travelBal').textContent=signed(bal);$('travelBal').style.color=bal>=0?'var(--green)':'var(--red)';
 $('travelIn').textContent='₩'+fmt(ti);$('travelOut').textContent='₩'+fmt(to);
