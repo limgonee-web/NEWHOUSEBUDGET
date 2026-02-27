@@ -129,7 +129,7 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 <div class="toast" id="toast"></div>
 
 <script>
-const GAS="https://script.google.com/macros/s/AKfycbwbFH8X33jqgBMek80xNDd3ZarsbP82OS0A-mYDaLB-fhJ7MGpva5JSAhb5O-iPvHVo/exec;
+const GAS="https://script.google.com/macros/s/AKfycbwbFH8X33jqgBMek80xNDd3ZarsbP82OS0A-mYDaLB-fhJ7MGpva5JSAhb5O-iPvHVo/exec";
 const CC={"입금":"#059669","고정비":"#6366f1","식비":"#d97706","생필품비":"#ec4899","고양이비":"#8b5cf6","가족비":"#dc2626","경조사비":"#dc2626","이월":"#6b7280","수입":"#059669","미용":"#ec4899","취미":"#3b82f6","관계":"#14b8a6","교통":"#a855f7","기타":"#9ca3af","병원":"#06b6d4","구독":"#8b5cf6","여행저금통":"#d97706","선물":"#ec4899","컨텐츠":"#3b82f6","사무용품":"#9ca3af","생활용품":"#ec4899"};
 const fmt=n=>(n==null||isNaN(n))?"0":Math.abs(n).toLocaleString("ko-KR");
 const signed=n=>{if(n==null||isNaN(n)||n===0)return'₩0';return(n<0?'-':'')+'₩'+fmt(n);};
