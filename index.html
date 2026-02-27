@@ -66,7 +66,6 @@ tr.dr:hover{background:#f5f3ff}
 .fi.formula-input{font-family:'SF Mono',Monaco,Consolas,monospace;color:var(--accent)}
 select.fi{color:var(--t4);-webkit-appearance:none;appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M3 5l3 3 3-3'/%3E%3C/svg%3E") no-repeat right 12px center;padding-right:32px}
 select.fi option{color:var(--t2)}
-input[type="date"].fi::-webkit-calendar-picker-indicator{opacity:0.85;cursor:pointer}
 input[type="number"].fi::-webkit-inner-spin-button,input[type="number"].fi::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 input[type="number"].fi{-moz-appearance:textfield}
 .fa{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
@@ -171,7 +170,7 @@ input[type="number"].fi{-moz-appearance:textfield}
 <div class="cards" style="margin-bottom:16px"><div class="sc" style="cursor:default"><div class="icon">✈️</div><div class="lb">저금통 잔액</div><div class="vl" style="color:var(--green)" id="travelBal">₩0</div></div><div class="sc" style="cursor:default"><div class="icon">💰</div><div class="lb">총 입금</div><div class="vl" style="color:var(--accent)" id="travelIn">₩0</div></div><div class="sc" style="cursor:default"><div class="icon">💸</div><div class="lb">총 출금</div><div class="vl" style="color:var(--red)" id="travelOut">₩0</div></div></div>
 <div class="pn" style="padding:14px"><div class="tw"><table style="table-layout:fixed"><colgroup><col style="width:80px"><col style="width:90px"><col style="width:90px"><col style="width:130px"><col style="width:100px"></colgroup><thead><tr><th>날짜</th><th>입금</th><th>출금</th><th>상세</th><th>잔액</th></tr></thead><tbody id="tbody-travel"></tbody></table></div></div>
 </div>
-<div class="tc" id="tab-sync"><div class="pn"><div class="pt">🔗 구글 시트 연동 설정</div><div style="font-size:14px;color:var(--t4);margin-bottom:16px;line-height:1.8">① 구글 시트 > Apps Script 열기<br>② Code.gs에 코드 붙여넣기<br>③ 배포 > 새 배포 > 웹 앱<br>④ 실행 주체: 본인 / 액세스: 모든 사용자<br>⑤ URL 입력 후 연결<br><br>💡 <b>GAS URL이 하드코딩되어 있어 페이지 로드 시 자동으로 연결됩니다.</b><br>수동 동기화가 필요할 때만 아래 버튼을 사용하세요.</div><div style="display:flex;gap:8px;margin-bottom:16px"><input class="fi" id="gasUrl" placeholder="https://script.google.com/macros/s/..." style="flex:1"><button class="bs" id="btnConnect">연결</button></div><div id="syncStatus" style="font-size:14px;color:var(--t5);margin-bottom:16px"></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ab" id="btnPull">📥 시트→앱</button><button class="ab" id="btnPush">📤 앱→시트</button></div><div id="syncLog" style="margin-top:16px;font-size:13px;color:var(--t4);max-height:200px;overflow-y:auto"></div></div></div>
+<div class="tc" id="tab-sync"><div class="pn"><div class="pt">🔗 구글 시트 연동 설정</div><div style="font-size:14px;color:var(--t4);margin-bottom:16px;line-height:1.8">💡 <b>페이지 로드 시 자동으로 시트 데이터를 불러옵니다.</b><br>수동 동기화가 필요할 때만 아래 버튼을 사용하세요.</div><div style="display:flex;gap:8px;margin-bottom:16px"><input class="fi" id="gasUrl" placeholder="https://script.google.com/macros/s/..." style="flex:1"><button class="bs" id="btnConnect">연결</button></div><div id="syncStatus" style="font-size:14px;color:var(--t5);margin-bottom:16px"></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ab" id="btnPull">📥 시트→앱</button><button class="ab" id="btnPush">📤 앱→시트</button></div><div id="syncLog" style="margin-top:16px;font-size:13px;color:var(--t4);max-height:200px;overflow-y:auto"></div></div></div>
 <div class="tc" id="tab-assets"><div class="sh"><h2>💎 자금 현황</h2><button class="ab" id="btnOpenAsset">+ 추가</button></div><div id="assetsList"></div></div>
 <div class="tc" id="tab-plan"><div class="sh"><h2>📋 총괄 계획</h2></div><div class="pg" id="planGrid"></div></div>
 </div>
@@ -184,51 +183,32 @@ input[type="number"].fi{-moz-appearance:textfield}
 <div class="modal-bg" id="extraModal"><div class="modal"><h3 id="extraModalTitle">기타 지출</h3><div class="fg" id="extraModalFields"></div><div class="fa" style="margin-top:16px"><button class="btn-red" id="btnDeleteExtra" style="display:none">삭제</button><div style="flex:1"></div><button class="bc-btn" id="btnCloseExtra">취소</button><button class="bs" id="btnSaveExtra">저장</button></div></div></div>
 
 <script>
-// ★ GAS URL 하드코딩 — GitHub Pages 배포 시 여기만 수정하면 됩니다
-const HARDCODED_GAS_URL = "https://script.google.com/macros/s/AKfycbyyFZPMDjEceZNKomn6Jj9NOcjNOEueGtKpyHq9LyH6_2PLdcv9LRW2hm5Pr-ZtR8eF/exec";
+// ★ GAS URL
+const HARDCODED_GAS_URL = "https://script.google.com/macros/s/AKfycbz9lg4UhaH231QzfyZiqmdhSxqcDLLpy4gufHMc_yCvGEIQ0GzK1knHdwUxqu1daG0O/exec";
 
 const CC={"입금":"#059669","고정비":"#6366f1","식비":"#d97706","생필품비":"#ec4899","고양이비":"#8b5cf6","가족비":"#dc2626","경조사비":"#dc2626","이월":"#6b7280","수입":"#059669","미용":"#ec4899","취미":"#3b82f6","관계":"#14b8a6","교통":"#a855f7","기타":"#9ca3af","병원":"#06b6d4","구독":"#8b5cf6","여행저금통":"#d97706","선물":"#ec4899","컨텐츠":"#3b82f6","사무용품":"#9ca3af","생활용품":"#ec4899"};
 const fmt=n=>{if(n==null||isNaN(n))return"0";return Math.abs(n).toLocaleString("ko-KR")};
 const N=n=>Number(n)||0;
 
-// ★ 날짜 포맷: yyyy-mm-dd 또는 yyyy-mm (dd 없으면)
 function fmtD(d){
   if(!d)return"";
-  // "2026. 2" or "2025. 11" 형태 (여행저금통 등)
-  if(/^\d{4}\.\s*\d{1,2}$/.test(d.trim())){
-    const p=d.trim().split(/\.\s*/);
-    return p[0]+'-'+p[1].padStart(2,'0');
-  }
-  // "2026. 1. 23" 형태
-  if(/^\d{4}\.\s*\d{1,2}\.\s*\d{1,2}$/.test(d.trim())){
-    const p=d.trim().split(/\.\s*/);
-    return p[0]+'-'+p[1].padStart(2,'0')+'-'+p[2].padStart(2,'0');
-  }
-  // ISO date "2026-02-01"
+  if(/^\d{4}\.\s*\d{1,2}$/.test(String(d).trim())){const p=String(d).trim().split(/\.\s*/);return p[0]+'-'+p[1].padStart(2,'0');}
+  if(/^\d{4}\.\s*\d{1,2}\.\s*\d{1,2}$/.test(String(d).trim())){const p=String(d).trim().split(/\.\s*/);return p[0]+'-'+p[1].padStart(2,'0')+'-'+p[2].padStart(2,'0');}
+  if(/^\d{4}-\d{2}(-\d{2})?$/.test(String(d).trim()))return String(d).trim();
   const t=new Date(d);
-  if(!isNaN(t)){
-    const y=t.getFullYear(),m=String(t.getMonth()+1).padStart(2,'0'),day=String(t.getDate()).padStart(2,'0');
-    return y+'-'+m+'-'+day;
-  }
-  return d;
+  if(!isNaN(t)){const y=t.getFullYear(),m=String(t.getMonth()+1).padStart(2,'0'),day=String(t.getDate()).padStart(2,'0');return y+'-'+m+'-'+day;}
+  return String(d);
 }
 
 let nid={household:200,goeun:200,hyunghwan:200};
 function evalFormula(s){if(typeof s!=='string')return N(s);s=s.trim();if(s.startsWith('=')){try{return N(eval(s.slice(1).replace(/[^0-9+\-*/.() ]/g,'')));}catch(e){return 0;}}return N(s);}
 
-const ALL_DATA={"2026-02":{
-household:[{id:1,date:"2026-01-26",category:"입금",detail:"전월 잔액",amount:0,balance:217480,note:""},{id:2,date:"2026-01-26",category:"입금",detail:"1월 생활비",amount:-1971182,balance:2188662,note:""},{id:3,date:"2026-01-30",category:"고정비",detail:"전세 이자",amount:828082,balance:1360580,note:""},{id:4,date:"2026-02-01",category:"고양이비",detail:"베란다 화분걸이",amount:15730,balance:1344850,note:""},{id:5,date:"2026-02-01",category:"생필품비",detail:"칼갈이",amount:17000,balance:1327850,note:""},{id:6,date:"2026-02-01",category:"입금",detail:"통장 이자",amount:-77,balance:1327927,note:""},{id:7,date:"2026-02-01",category:"고정비",detail:"1월 넷플릭스",amount:18500,balance:1309427,note:"형환 출금"},{id:8,date:"2026-02-01",category:"고정비",detail:"1월 네이버",amount:4900,balance:1304527,note:"고은 출금"},{id:9,date:"2026-02-01",category:"가족비",detail:"일산 어머니 레드향",amount:25800,balance:1278727,note:"자유로마트"},{id:10,date:"2026-02-01",category:"생필품비",detail:"도마, 롤휴지, 스뎅 볼",amount:17000,balance:1261727,note:"다이소"},{id:11,date:"2026-02-02",category:"식비",detail:"된찌 재료",amount:15680,balance:1246047,note:"GS"},{id:12,date:"2026-02-04",category:"식비",detail:"파리바게뜨 빵",amount:6150,balance:1239897,note:""},{id:13,date:"2026-02-06",category:"식비",detail:"꾸브라꼬 치킨",amount:37400,balance:1202497,note:""},{id:14,date:"2026-02-08",category:"식비",detail:"찌개용 고기, 계란",amount:17900,balance:1184597,note:""},{id:15,date:"2026-02-08",category:"식비",detail:"두부, 우유, 버터, 파스타면",amount:22640,balance:1161957,note:"컬리"},{id:16,date:"2026-02-08",category:"생필품비",detail:"보풀제거기",amount:39800,balance:1122157,note:""},{id:17,date:"2026-02-11",category:"식비",detail:"수육용 고기",amount:16700,balance:1105457,note:"복마니정육점"},{id:18,date:"2026-02-11",category:"고정비",detail:"네이버 멤버십",amount:4900,balance:1100557,note:""},{id:19,date:"2026-02-13",category:"식비",detail:"만두 등",amount:22990,balance:893567,note:""},{id:20,date:"2026-02-13",category:"생필품비",detail:"논슬립테이프",amount:2000,balance:891567,note:"다이소"},{id:21,date:"2026-02-14",category:"가족비",detail:"양가 설 선물 - LA갈비",amount:184000,balance:916557,note:""},{id:22,date:"2026-02-15",category:"가족비",detail:"목동집 오렌지",amount:49800,balance:841767,note:""},{id:23,date:"2026-02-16",category:"가족비",detail:"중산집 곶감 딸기",amount:30080,balance:811687,note:""},{id:24,date:"2026-02-16",category:"생필품비",detail:"도시락 통, 요리용 국자/젓가락",amount:68800,balance:742887,note:"스타필드"},{id:25,date:"2026-02-16",category:"생필품비",detail:"포크",amount:7900,balance:734987,note:"모던하우스"},{id:26,date:"2026-02-17",category:"식비",detail:"술안주, 막걸리",amount:5830,balance:729157,note:""},{id:27,date:"2026-02-19",category:"식비",detail:"호식이 두마리 치킨",amount:28300,balance:700857,note:""},{id:28,date:"2026-02-18",category:"생필품비",detail:"랜선",amount:10000,balance:690857,note:"다이소"},{id:29,date:"2026-02-20",category:"고정비",detail:"1월 가스비",amount:229320,balance:461537,note:""},{id:30,date:"2026-02-22",category:"생필품비",detail:"주방 세제",amount:2000,balance:459537,note:""},{id:31,date:"2026-02-22",category:"식비",detail:"먹짱 페스타",amount:36470,balance:423067,note:"컬리"},{id:32,date:"2026-02-23",category:"식비",detail:"막걸리",amount:3100,balance:419967,note:""}],
-goeun:[{id:1,date:"2026-02-01",category:"이월",detail:"",amount:-98956,balance:498956,note:""},{id:2,date:"2026-02-01",category:"취미",detail:"다이소 실",amount:6000,balance:492956,note:""},{id:3,date:"2026-02-02",category:"미용",detail:"트러블 패치",amount:2496,balance:490460,note:""},{id:4,date:"2026-02-03",category:"관계",detail:"언니 택시",amount:11100,balance:479360,note:""},{id:5,date:"2026-02-05",category:"식비",detail:"붕어빵",amount:2000,balance:477360,note:""},{id:6,date:"2026-02-12",category:"미용",detail:"수분크림",amount:28260,balance:449100,note:""},{id:7,date:"2026-02-11",category:"취미",detail:"뜨개 책",amount:14963,balance:434137,note:""},{id:8,date:"2026-02-12",category:"취미",detail:"뜨개 실, 바늘",amount:4000,balance:430137,note:""},{id:9,date:"2026-02-13",category:"취미",detail:"뜨개 실, 클립",amount:3000,balance:427137,note:""},{id:10,date:"2026-02-13",category:"취미",detail:"핏3",amount:55000,balance:372137,note:""},{id:11,date:"2026-02-13",category:"취미",detail:"프리렌",amount:44000,balance:328137,note:""},{id:12,date:"2026-02-16",category:"취미",detail:"뜨개 실",amount:12000,balance:316137,note:""},{id:13,date:"2026-02-18",category:"취미",detail:"뜨개 용품",amount:6000,balance:310137,note:""},{id:14,date:"2026-02-20",category:"식비",detail:"붕어빵",amount:2000,balance:308137,note:""},{id:15,date:"2026-02-22",category:"미용",detail:"애크논",amount:10000,balance:298137,note:""},{id:16,date:"2026-02-22",category:"취미",detail:"뜨개 실",amount:10000,balance:288137,note:""}],
-hyunghwan:[{id:1,date:"2026-02-01",category:"이월",detail:"",amount:8661,balance:391339,note:""},{id:2,date:"2026-02-02",category:"식비",detail:"두쫀쿠",amount:15600,balance:375739,note:"사후정산 / 맛이쩌"},{id:3,date:"2026-02-03",category:"취미",detail:"알리-공구",amount:23700,balance:352039,note:""},{id:4,date:"2026-02-06",category:"취미",detail:"알리-게임기 부품",amount:39350,balance:312689,note:""},{id:5,date:"2026-02-06",category:"미용",detail:"이든헤어",amount:25000,balance:287689,note:""},{id:6,date:"2026-02-06",category:"취미",detail:"알리-접지플러그, 전동칫솔",amount:27320,balance:260369,note:""},{id:7,date:"2026-02-12",category:"식비",detail:"케이준 감튀",amount:8900,balance:251469,note:""},{id:8,date:"2026-02-12",category:"식비",detail:"스타 회식",amount:30000,balance:221469,note:"하하 스타회식"},{id:9,date:"2026-02-19",category:"취미",detail:"필라멘트",amount:18000,balance:203469,note:""},{id:10,date:"2026-02-21",category:"취미",detail:"플스 cd",amount:49000,balance:154469,note:""},{id:11,date:"2026-02-24",category:"미용",detail:"넥타이 벨트",amount:64800,balance:89669,note:"유니클로"},{id:12,date:"2026-02-25",category:"취미",detail:"카메라용품",amount:21925,balance:67744,note:"알리"}],
-budget:[{category:"고정비",budget:1221182,formula:"",memo:""},{category:"식비",budget:550000,formula:"",memo:""},{category:"생필품비",budget:150000,formula:"",memo:""},{category:"고양이비",budget:50000,formula:"",memo:""},{category:"가족비",budget:0,formula:"",memo:""}],
-goeunExtra:[{item:"진단서",amount:50000},{item:"삼케플",amount:7900},{item:"엄빠 일본 용돈",amount:300000},{item:"수련 축의",amount:200000}],
-hyunghwanExtra:[{item:"연구소 조의금",amount:5000}],
-memos:["🐱 음쓰처리기 - 식초냄새 날때 쯤 필터 교환 (대략 3-4개월 주기)","🌀 공청기 - 필터 갈 때 됨 (대략 12개월 주기)"]
-}};
+// ★ 하드코딩 기본 데이터 (시트 연동 전 폴백)
+const ALL_DATA={};
 let curMonth="2026-02",D=null;
 const catFilters={household:null,goeun:null,hyunghwan:null};
-const sharedTravel=[{id:1,date:"2025-11",inp:400000,out:0,detail:"11월 저금통",balance:400000},{id:2,date:"2025-12",inp:400000,out:0,detail:"12월 저금통",balance:800000},{id:3,date:"2026-01",inp:400000,out:0,detail:"1월 저금통",balance:1200000},{id:4,date:"2026-01",inp:1318,out:0,detail:"~1.23 까지 이자",balance:1201318},{id:5,date:"2026-01",inp:0,out:88472,detail:"제주도 비행기",balance:1112846},{id:6,date:"2026-02",inp:0,out:878800,detail:"나고야 비행기",balance:234046},{id:7,date:"2026-02",inp:0,out:381669,detail:"나고야 숙소",balance:-147623}];
-const sharedAssets=[{id:1,period:"2026-01-23",goeun:{cash:11381986,savings:6720000,stock:24708998,pension:14343351,etc:0},hyunghwan:{cash:37623759,savings:1460000,stock:0,pension:0,etc:4996},deposit:350000000},{id:2,period:"2025-12-25",goeun:{cash:19649451,savings:6720578,stock:14476928,pension:14386907,etc:0},hyunghwan:{cash:25480568,savings:1460000,stock:7457213,pension:0,etc:0},deposit:350000000},{id:3,period:"2025-11-30",goeun:{cash:18018530,savings:6720578,stock:14297731,pension:14287352,etc:4762},hyunghwan:{cash:25498296,savings:1460000,stock:6465253,pension:0,etc:0},deposit:350000000}];
+const sharedTravel=[];
+const sharedAssets=[];
 const sharedPlan={income:[{id:1,item:"형환 월급(성과급 포함x)",amount:3200000},{id:2,item:"고니 월급",amount:3710000}],fixed:[{id:1,cat:"집",who:"공동",item:"전세금 이자",amount:828082,note:""},{id:2,cat:"집",who:"공동",item:"관리비",amount:180000,note:""},{id:3,cat:"집",who:"공동",item:"가스비",amount:150000,note:"겨울 18만, 여름 9만"},{id:4,cat:"집",who:"공동",item:"인터넷",amount:29700,note:""},{id:5,cat:"보험",who:"화니",item:"자동차",amount:70833,note:"11월 갱신"},{id:6,cat:"보험",who:"화니",item:"연금보험 연금저축",amount:20000,note:"월급 공제"},{id:7,cat:"보험",who:"화니",item:"실비(교보)",amount:9590,note:""},{id:8,cat:"보험",who:"화니",item:"운전자 상해보험",amount:29850,note:""},{id:9,cat:"보험",who:"고니",item:"실비(교직원 공제회)",amount:113360,note:""},{id:10,cat:"통신비",who:"화니",item:"핸드폰",amount:24900,note:""},{id:11,cat:"통신비",who:"고니",item:"핸드폰",amount:17000,note:""},{id:12,cat:"교통",who:"화니",item:"자동차 할부",amount:333333,note:"잔여 5회"},{id:13,cat:"교통",who:"화니",item:"전기차 충전",amount:100000,note:""},{id:14,cat:"교통",who:"화니",item:"셔틀버스",amount:13000,note:"월급 공제"},{id:15,cat:"교통",who:"고니",item:"K패스",amount:30000,note:""},{id:16,cat:"구독",who:"공동",item:"넷플릭스",amount:18500,note:""},{id:17,cat:"구독",who:"공동",item:"네이버",amount:4900,note:""},{id:18,cat:"구독",who:"고니",item:"삼케플",amount:7900,note:""},{id:19,cat:"구독",who:"화니",item:"삼케플",amount:7900,note:""}],living:[{id:1,item:"식비",amount:600000},{id:2,item:"생필품비",amount:100000},{id:3,item:"고양이비",amount:100000},{id:4,item:"경조사비",amount:400000}],allowance:[{id:1,item:"화니 용돈",amount:400000},{id:2,item:"고니 용돈",amount:400000}]};
 let asNid=10,plNid=100,tvNid=100,extraEditCtx=null,planEditCtx=null,editAssetId=null,editMemoIdx=-1,editCtx=null;
 
@@ -237,27 +217,39 @@ function loadMonth(m){curMonth=m;D=ALL_DATA[m];if(!D){D={household:[],goeun:[],h
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 function openModal(id){document.getElementById(id).classList.add('show');}
 
-(function(){const sel=document.getElementById('monthPicker');["2026-02","2026-01","2025-12","2025-11","2025-10","2025-09"].forEach(m=>{const o=document.createElement('option');const[y,mo]=m.split('-');o.value=m;o.textContent=`${y}년 ${mo}월`;sel.appendChild(o);});sel.value="2026-02";sel.addEventListener('change',e=>loadMonth(e.target.value));})();
+(function(){const sel=document.getElementById('monthPicker');["2026-03","2026-02","2026-01","2025-12","2025-11","2025-10","2025-09"].forEach(m=>{const o=document.createElement('option');const[y,mo]=m.split('-');o.value=m;o.textContent=`${y}년 ${parseInt(mo)}월`;sel.appendChild(o);});sel.value="2026-02";sel.addEventListener('change',e=>loadMonth(e.target.value));})();
 document.querySelectorAll('.tb').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
 
+// ★★★ 잔액 계산 수정: balance 열에 유효값이 있으면 사용, 없으면 직접 계산 ★★★
 function getBal(arr){
-  // 이월/수입 항목의 금액(음수=입금)을 합산하고, 지출 항목을 차감하여 잔액 계산
-  // 데이터의 마지막 balance 값을 사용
-  const s=arr.slice().sort((a,b)=>{
+  if(!arr||!arr.length) return 0;
+  // 원본 순서대로 (id 순) 마지막 행의 balance를 확인
+  const sorted=arr.slice().sort((a,b)=>{
     const da=new Date(a.date),db=new Date(b.date);
-    if(da-db!==0)return da-db;
-    return a.id-b.id;
+    if(isNaN(da)||isNaN(db)) return (a.id||0)-(b.id||0);
+    if(da-db!==0) return da-db;
+    return (a.id||0)-(b.id||0);
   });
-  return s.length?s[s.length-1].balance:0;
+  // 마지막 항목의 balance가 유효하면 그대로 사용
+  const last=sorted[sorted.length-1];
+  if(last.balance && last.balance!==0) return last.balance;
+  // balance가 0인 경우: 유효한 balance를 가진 마지막 항목 찾기
+  for(let i=sorted.length-1;i>=0;i--){
+    if(sorted[i].balance && sorted[i].balance!==0) return sorted[i].balance;
+  }
+  // 모두 0이면 직접 계산: 이월/수입/입금은 양수, 나머지는 차감
+  let bal=0;
+  sorted.forEach(r=>{
+    if(r.amount<0) bal+=Math.abs(r.amount); // 음수 = 입금
+    else bal-=r.amount; // 양수 = 지출
+  });
+  return bal;
 }
 
-// 시트에서 불러온 데이터에서 "기타 지출 비용" 관련 행 필터링
 function filterExtraRows(rows){
   return rows.filter(r=>{
-    // "기타 지출 비용" 헤더행이나 하위 항목 제거
     if(!r.date && !r.category && r.detail==='기타 지출 비용') return false;
     if(!r.date && !r.category) return false;
-    // amount와 balance가 둘 다 0이고 category가 없는 행 제거
     if(!r.category && r.amount===0 && r.balance===0) return false;
     return true;
   });
@@ -284,7 +276,7 @@ const hh=D.household,ge=D.goeun,hw=D.hyunghwan;
 const hhBal=getBal(hh),hhSp=hh.filter(r=>r.amount>0).reduce((s,r)=>s+r.amount,0);
 const geBal=getBal(ge),geSp=ge.filter(r=>r.amount>0).reduce((s,r)=>s+r.amount,0);
 const hwBal=getBal(hw),hwSp=hw.filter(r=>r.amount>0).reduce((s,r)=>s+r.amount,0);
-const tvBal=sharedTravel[sharedTravel.length-1]?.balance||0;
+const tvBal=sharedTravel.length?sharedTravel[sharedTravel.length-1].balance:0;
 document.getElementById('statCards').innerHTML=
 `<div class="sc" onclick="switchTab('household')"><div class="icon">🏠</div><div class="lb">공동 잔액</div><div class="vl" style="color:var(--accent)">₩${fmt(hhBal)}</div><div class="sb">총 지출 ₩${fmt(hhSp)}</div></div>`+
 `<div class="sc" onclick="switchTab('goeun')"><div class="icon">🧶</div><div class="lb">고은 잔액</div><div class="vl" style="color:var(--pink)">₩${fmt(geBal)}</div><div class="sb">지출 ₩${fmt(geSp)}</div></div>`+
@@ -316,7 +308,9 @@ renderHouseholdMoM();}
 
 function renderHouseholdMoM(){
 const el=document.getElementById('assetSummaryArea');
-const prevMonth=curMonth==='2026-02'?'2026-01':null;
+const months=Object.keys(ALL_DATA).sort();
+const ci=months.indexOf(curMonth);
+const prevMonth=ci>0?months[ci-1]:null;
 const prevD=prevMonth?ALL_DATA[prevMonth]:null;
 const curCats=['고정비','식비','생필품비','고양이비','가족비'];
 const curByCat={};D.household.filter(r=>r.amount>0).forEach(r=>{if(curCats.includes(r.category))curByCat[r.category]=(curByCat[r.category]||0)+r.amount;});
@@ -324,8 +318,8 @@ const prevByCat={};if(prevD)prevD.household?.filter(r=>r.amount>0).forEach(r=>{i
 const chg=v=>v>0?`<span class="chg-pos">▲ +₩${fmt(v)}</span>`:v<0?`<span class="chg-neg">▼ -₩${fmt(Math.abs(v))}</span>`:`<span style="color:var(--t5);font-size:12px">—</span>`;
 const curT=curCats.reduce((s,c)=>s+(curByCat[c]||0),0),prevT=curCats.reduce((s,c)=>s+(prevByCat[c]||0),0);
 if(!prevD){el.innerHTML=`<div class="asset-summary"><div class="as-title">📊 이번 달 공동 가계부</div>${curCats.map(c=>`<div class="as-row"><span class="l">${c}</span><span class="v">₩${fmt(curByCat[c]||0)}</span></div>`).join('')}<div class="as-total"><span>합계</span><span class="v">₩${fmt(curT)}</span></div></div>`;return;}
-const[y,mo]=curMonth.split('-');const pm=prevMonth.split('-');
-el.innerHTML=`<div class="asset-summary"><div class="as-title">📈 전월 대비 공동 지출 변동 (${pm[1]}월 → ${mo}월)</div>
+const mo=curMonth.split('-')[1];const pm=prevMonth.split('-')[1];
+el.innerHTML=`<div class="asset-summary"><div class="as-title">📈 전월 대비 공동 지출 변동 (${parseInt(pm)}월 → ${parseInt(mo)}월)</div>
 ${curCats.map(c=>{const cur=curByCat[c]||0,prev=prevByCat[c]||0,d=cur-prev;return`<div class="as-row"><span class="l">${c}</span><span class="v">${chg(d)}</span></div>`;}).join('')}
 <div class="as-total"><span>합계 변동</span><span class="v">${chg(curT-prevT)}</span></div></div>`;}
 
@@ -423,65 +417,111 @@ document.getElementById('btnCloseEdit').onclick=()=>closeModal('editModal');
 
 ['assetModal','planModal','budgetModal','extraModal','editModal','actionModal'].forEach(id=>{document.getElementById(id).onclick=e=>{if(e.target===e.currentTarget)e.target.classList.remove('show');};});
 
-loadMonth("2026-02");
-
-// ★ Sync — GAS URL 하드코딩 + 자동 연동
+// ★★★ 동기화: getAllData 단일 호출로 변경 ★★★
 let GAS_URL=HARDCODED_GAS_URL;
 function slog(m){const el=document.getElementById('syncLog');el.innerHTML=`<div>[${new Date().toLocaleTimeString('ko-KR')}] ${m}</div>`+el.innerHTML;}
-
 function showBanner(msg,type){
   const el=document.getElementById('autoSyncBanner');
   el.innerHTML=`<div class="auto-sync-banner ${type||''}">${msg}</div>`;
   if(type!=='error'&&type!=='loading') setTimeout(()=>{el.innerHTML='';},5000);
 }
 
-// 페이지 로드 시 자동으로 URL 세팅 + 연결 + 시트→앱 불러오기
 document.getElementById('gasUrl').value=GAS_URL;
+
+function applyAllData(result){
+  const months=result.months||[];
+  const md=result.monthData||{};
+
+  // 월별 데이터 적용
+  for(const m of months){
+    const res=md[m];
+    if(!res||res.error) continue;
+    if(!ALL_DATA[m]) ALL_DATA[m]={household:[],goeun:[],hyunghwan:[],budget:[],goeunExtra:[],hyunghwanExtra:[],memos:[]};
+    const d=ALL_DATA[m];
+    if(res.household?.length){d.household=filterExtraRows(res.household).map((r,i)=>({id:i+1,...r}));}
+    if(res.goeun?.length){d.goeun=filterExtraRows(res.goeun).map((r,i)=>({id:i+1,...r}));}
+    if(res.hyunghwan?.length){d.hyunghwan=filterExtraRows(res.hyunghwan).map((r,i)=>({id:i+1,...r}));}
+    if(res.budget?.length) d.budget=res.budget;
+    if(res.goeunExtra?.length) d.goeunExtra=res.goeunExtra;
+    if(res.hyunghwanExtra?.length) d.hyunghwanExtra=res.hyunghwanExtra;
+    if(res.memos?.length) d.memos=res.memos;
+    slog('  ✅ '+m+' 로드 완료');
+  }
+
+  // 여행저금통
+  if(result.travel?.length){
+    sharedTravel.length=0;
+    result.travel.forEach((r,i)=>sharedTravel.push({id:i+1,...r}));
+    slog('  ✅ 여행 '+result.travel.length+'건');
+  }
+
+  // 자금현황
+  if(result.assets?.length){
+    sharedAssets.length=0;
+    result.assets.forEach((a,i)=>sharedAssets.push({id:i+1,...a}));
+    slog('  ✅ 자금 '+result.assets.length+'건');
+  }
+
+  // 월 선택기 업데이트
+  if(months.length){
+    const sel=document.getElementById('monthPicker');
+    const sorted=months.slice().sort().reverse();
+    sel.innerHTML='';
+    sorted.forEach(m=>{
+      const o=document.createElement('option');
+      const[y,mo]=m.split('-');
+      o.value=m;o.textContent=`${y}년 ${parseInt(mo)}월`;
+      sel.appendChild(o);
+    });
+    // 현재 월이 목록에 있으면 유지, 없으면 최신 월
+    if(months.includes(curMonth)){sel.value=curMonth;}
+    else{curMonth=sorted[0];sel.value=curMonth;}
+  }
+
+  loadMonth(curMonth);
+}
 
 async function autoSync(){
   if(!GAS_URL)return;
   showBanner('⏳ 시트에서 데이터를 불러오는 중...','loading');
   document.getElementById('syncStatus').innerHTML='⏳ 자동 연결 중...';
+  const t0=performance.now();
+
   try{
-    const mr=await fetch(GAS_URL+'?action=getMonths',{redirect:'follow'}).then(r=>r.json());
-    if(!mr.months){showBanner('❌ 연결 실패: months 없음','error');return;}
-    document.getElementById('syncStatus').innerHTML='<span style="color:var(--green)">✅ 연결됨 (자동)</span>';
-    slog('✅ 자동 연결 성공: '+mr.months.join(', '));
-    for(const m of(mr.months||[])){
-      const res=await fetch(GAS_URL+'?action=getMonth&month='+m,{redirect:'follow'}).then(r=>r.json());
-      if(res.error){slog('  ❌ '+m+': '+res.error);continue;}
-      if(!ALL_DATA[m])ALL_DATA[m]={household:[],goeun:[],hyunghwan:[],budget:[],goeunExtra:[],hyunghwanExtra:[],memos:[]};
-      const md=ALL_DATA[m];
-      if(res.household?.length){const filtered=filterExtraRows(res.household);md.household=filtered.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 가계부 '+filtered.length+'건');}
-      if(res.goeun?.length){const filtered=filterExtraRows(res.goeun);md.goeun=filtered.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 고은 '+filtered.length+'건');}
-      if(res.hyunghwan?.length){const filtered=filterExtraRows(res.hyunghwan);md.hyunghwan=filtered.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 형환 '+filtered.length+'건');}
-      if(res.budget?.length)md.budget=res.budget;
-      if(res.goeunExtra?.length)md.goeunExtra=res.goeunExtra;
-      if(res.hyunghwanExtra?.length)md.hyunghwanExtra=res.hyunghwanExtra;
-      if(res.memos?.length)md.memos=res.memos;
+    // ★ 단일 API 호출로 모든 데이터 가져오기
+    const result=await fetch(GAS_URL+'?action=getAllData',{redirect:'follow'}).then(r=>r.json());
+
+    if(result.error){
+      showBanner('❌ 연결 실패: '+result.error,'error');
+      return;
     }
-    const tv=await fetch(GAS_URL+'?action=getTravel',{redirect:'follow'}).then(r=>r.json());
-    if(tv.travel?.length){sharedTravel.length=0;tv.travel.forEach((r,i)=>sharedTravel.push({id:i+1,...r}));slog('  ✅ 여행 '+tv.travel.length+'건');}
-    const as=await fetch(GAS_URL+'?action=getAssets',{redirect:'follow'}).then(r=>r.json());
-    if(as.assets?.length){sharedAssets.length=0;as.assets.forEach((a,i)=>sharedAssets.push({id:i+1,...a}));slog('  ✅ 자금 '+as.assets.length+'건');}
-    loadMonth(curMonth);
-    slog('✅ 자동 불러오기 완료!');
-    showBanner('✅ 시트 데이터를 자동으로 불러왔습니다','');
+
+    const elapsed=((performance.now()-t0)/1000).toFixed(1);
+    document.getElementById('syncStatus').innerHTML=`<span style="color:var(--green)">✅ 연결됨 (${elapsed}초)</span>`;
+    slog(`✅ getAllData 단일 호출 완료 (${elapsed}초)`);
+
+    applyAllData(result);
+
+    showBanner(`✅ 시트 데이터 로드 완료 (${elapsed}초)`,'');
   }catch(e){
     slog('❌ 자동 연동 오류: '+e.message);
-    showBanner('❌ 자동 연동 실패: '+e.message+' (시트연동 탭에서 수동 시도)','error');
+    showBanner('❌ 자동 연동 실패: '+e.message,'error');
     document.getElementById('syncStatus').innerHTML='<span style="color:var(--red)">❌ 자동 연결 실패</span>';
+    // 폴백: 빈 데이터라도 렌더
+    if(!ALL_DATA[curMonth]) ALL_DATA[curMonth]={household:[],goeun:[],hyunghwan:[],budget:[],goeunExtra:[],hyunghwanExtra:[],memos:[]};
+    loadMonth(curMonth);
   }
 }
 
-// 페이지 로드 시 자동 실행
+// 페이지 로드 시 즉시 빈 화면 방지 → 바로 렌더 후 비동기 로드
+if(!ALL_DATA[curMonth]) ALL_DATA[curMonth]={household:[],goeun:[],hyunghwan:[],budget:[],goeunExtra:[],hyunghwanExtra:[],memos:[]};
+loadMonth(curMonth);
 autoSync();
 
-// 수동 연결 버튼 (URL 변경 시)
 document.getElementById('btnConnect').onclick=()=>{GAS_URL=document.getElementById('gasUrl').value.trim();if(!GAS_URL)return;autoSync();};
 
-// 수동 시트→앱
-document.getElementById('btnPull').onclick=async()=>{if(!GAS_URL)return;slog('📥 수동 불러오기 시작...');document.getElementById('btnPull').textContent='⏳ 불러오는 중...';try{const mr=await fetch(GAS_URL+'?action=getMonths',{redirect:'follow'}).then(r=>r.json());for(const m of(mr.months||[])){slog('  📄 '+m+' 요청 중...');const res=await fetch(GAS_URL+'?action=getMonth&month='+m,{redirect:'follow'}).then(r=>r.json());if(res.error){slog('  ❌ '+m+': '+res.error);continue;}if(!ALL_DATA[m])ALL_DATA[m]={household:[],goeun:[],hyunghwan:[],budget:[],goeunExtra:[],hyunghwanExtra:[],memos:[]};const md=ALL_DATA[m];if(res.household?.length){const filtered=filterExtraRows(res.household);md.household=filtered.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 가계부 '+filtered.length+'건');}if(res.goeun?.length){const filtered=filterExtraRows(res.goeun);md.goeun=filtered.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 고은 '+filtered.length+'건');}if(res.hyunghwan?.length){const filtered=filterExtraRows(res.hyunghwan);md.hyunghwan=filtered.map((r,i)=>({id:i+1,...r}));slog('  ✅ '+m+' 형환 '+filtered.length+'건');}if(res.budget?.length)md.budget=res.budget;if(res.goeunExtra?.length)md.goeunExtra=res.goeunExtra;if(res.hyunghwanExtra?.length)md.hyunghwanExtra=res.hyunghwanExtra;if(res.memos?.length)md.memos=res.memos;}slog('  ✈️ 여행저금통...');const tv=await fetch(GAS_URL+'?action=getTravel',{redirect:'follow'}).then(r=>r.json());if(tv.travel?.length){sharedTravel.length=0;tv.travel.forEach((r,i)=>sharedTravel.push({id:i+1,...r}));slog('  ✅ 여행 '+tv.travel.length+'건');}slog('  💎 자금현황...');const as=await fetch(GAS_URL+'?action=getAssets',{redirect:'follow'}).then(r=>r.json());if(as.assets?.length){sharedAssets.length=0;as.assets.forEach((a,i)=>sharedAssets.push({id:i+1,...a}));slog('  ✅ 자금 '+as.assets.length+'건');}loadMonth(curMonth);slog('✅ 불러오기 완료!');}catch(e){slog('❌ 오류: '+e.message);}document.getElementById('btnPull').textContent='📥 시트→앱';};
+// 수동 시트→앱 (역시 getAllData 사용)
+document.getElementById('btnPull').onclick=async()=>{if(!GAS_URL)return;slog('📥 수동 불러오기 시작...');document.getElementById('btnPull').textContent='⏳ 불러오는 중...';try{const result=await fetch(GAS_URL+'?action=getAllData',{redirect:'follow'}).then(r=>r.json());if(result.error){slog('❌ '+result.error);}else{applyAllData(result);slog('✅ 불러오기 완료!');};}catch(e){slog('❌ 오류: '+e.message);}document.getElementById('btnPull').textContent='📥 시트→앱';};
 
 // 수동 앱→시트
 document.getElementById('btnPush').onclick=async()=>{if(!GAS_URL||!D)return;slog('📤 '+curMonth+' 저장 시작...');document.getElementById('btnPush').textContent='⏳ 저장 중...';try{const post=b=>fetch(GAS_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(b)}).then(r=>r.json());for(const row of D.household)await post({action:'writeHousehold',month:curMonth,row:{date:row.date,category:row.category,detail:row.detail,amount:row.amount,balance:row.balance,note:row.note}});slog('  ✅ 가계부 '+D.household.length+'건');for(const row of D.goeun)await post({action:'writePersonal',month:curMonth,who:'goeun',row:{date:row.date,category:row.category,detail:row.detail,amount:row.amount,balance:row.balance,note:row.note}});slog('  ✅ 고은 '+D.goeun.length+'건');for(const row of D.hyunghwan)await post({action:'writePersonal',month:curMonth,who:'hyunghwan',row:{date:row.date,category:row.category,detail:row.detail,amount:row.amount,balance:row.balance,note:row.note}});slog('  ✅ 형환 '+D.hyunghwan.length+'건');await post({action:'writeBudget',month:curMonth,budgets:D.budget});slog('  ✅ 예산');if(D.memos?.length){await post({action:'writeMemo',month:curMonth,memos:D.memos});slog('  ✅ 메모');}slog('✅ 저장 완료!');}catch(e){slog('❌ 오류: '+e.message);}document.getElementById('btnPush').textContent='📤 앱→시트';};
