@@ -202,7 +202,6 @@ el.style.display='flex';const cf=catFilters[key];
 el.innerHTML=Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="cat-bar-item${cf===k?' active':''}" onclick="toggleCatFilter('${key}','${k}')"><div class="cat-bar-dot" style="background:${CC[k]||'#6b7280'}"></div>${k} <span class="cat-bar-pct">${(v/total*100).toFixed(0)}%</span></div>`).join('');}
 function toggleCatFilter(key,cat){catFilters[key]=catFilters[key]===cat?null:cat;renderFilteredTable(key);renderCatBar('catbar-'+key,key,D[key]);}
 
-// ★ 5번: 변동 표시 — 더 쓰고 있어요 / 덜 쓰고 있어요
 function chgText(v){
   if(v>0) return `<span class="chg-more">₩${fmt(v)} 더 쓰고 있어요</span>`;
   if(v<0) return `<span class="chg-less">₩${fmt(Math.abs(v))} 덜 쓰고 있어요</span>`;
@@ -221,14 +220,13 @@ $('statCards').innerHTML=
 `<div class="sc" onclick="switchTab('hyunghwan')"><div class="icon">🎮</div><div class="lb">형환 잔액</div><div class="vl" style="color:var(--blue)">₩${fmt(hwB)}</div><div class="sb">지출 ₩${fmt(hwS)}</div></div>`+
 `<div class="sc" onclick="switchTab('travel')"><div class="icon">✈️</div><div class="lb">여행저금통</div><div class="vl" style="color:${tvB>=0?'var(--green)':'var(--red)'}">${tvB<0?'-':''}₩${fmt(Math.abs(tvB))}</div></div>`;
 const byCat={};hh.filter(r=>{const c=r.category||'';return c!=='입금'&&c!=='수입'&&c!=='이월';}).forEach(r=>{const amt=Math.abs(N(r.amount));byCat[r.category]=(byCat[r.category]||0)+amt;});
-$('budgetGrid').innerHTML=(D.budget||[]).map((b,i)=>{const sp=byCat[b.category]||0;const p=b.budget>0?Math.min(sp/b.budget*100,120):0;const ov=sp>b.budget;const c=CC[b.category]||'#6366f1';return`<div class="budget-card" onclick="openBudgetModal(${i})"><div class="bc-header"><span class="bc-cat">${b.category}</span><span class="bc-rate" style="background:${ov?'#fef2f2':'#f0fdf4'};color:${ov?'#dc2626':'#059669'}">${b.budget>0?p.toFixed(0)+'%':'-'}</span></div><div class="bc-bar"><div class="bc-fill" style="width:${Math.min(p,100)}%;background:${ov?'#dc2626':c}"></div></div><div class="bc-row"><span class="l">예산</span><span class="v">₩${fmt(b.budget)}</span></div><div class="bc-row"><span class="l">지출</span><span class="v" style="color:${ov?'#dc2626':'inherit'}">₩${fmt(sp)}</span></div><div class="bc-row"><span class="l">잔액</span><span class="v" style="color:${sp>b.budget?'#dc2626':'#059669'}">₩${fmt(b.budget-sp)}</span></div>${b.memo?`<div class="bc-memo">${b.memo}</div>`:''}</div>`;}).join('');
+$('budgetGrid').innerHTML=(D.budget||[]).map((b,i)=>{const sp=byCat[b.category]||0;const bg=N(b.budget);const p=bg>0?Math.min(sp/bg*100,120):0;const ov=sp>bg;const c=CC[b.category]||'#6366f1';const remain=bg-sp;return`<div class="budget-card" onclick="openBudgetModal(${i})"><div class="bc-header"><span class="bc-cat">${b.category}</span><span class="bc-rate" style="background:${ov?'#fef2f2':'#f0fdf4'};color:${ov?'#dc2626':'#059669'}">${bg>0?p.toFixed(0)+'%':'-'}</span></div><div class="bc-bar"><div class="bc-fill" style="width:${Math.min(p,100)}%;background:${ov?'#dc2626':c}"></div></div><div class="bc-row"><span class="l">예산</span><span class="v">₩${fmt(bg)}</span></div><div class="bc-row"><span class="l">지출</span><span class="v" style="color:${ov?'#dc2626':'inherit'}">₩${fmt(sp)}</span></div><div class="bc-row"><span class="l">잔액</span><span class="v" style="color:${remain<0?'#dc2626':'#3b82f6'}">${remain<0?'-':''}₩${fmt(Math.abs(remain))}</span></div>${b.memo?`<div class="bc-memo">${b.memo}</div>`:''}</div>`;}).join('');
 const entries=Object.entries(byCat);const total=entries.reduce((s,[,v])=>s+v,0);
 let cum=0;const r=60,cx=80,cy=80;let paths='';
 entries.forEach(([k,v])=>{const p=v/total;if(p<.005)return;const sa=cum*2*Math.PI-Math.PI/2;cum+=p;const ea=cum*2*Math.PI-Math.PI/2;const lg=p>.5?1:0;paths+=`<path d="M ${cx+r*Math.cos(sa)} ${cy+r*Math.sin(sa)} A ${r} ${r} 0 ${lg} 1 ${cx+r*Math.cos(ea)} ${cy+r*Math.sin(ea)}" fill="none" stroke="${CC[k]||'#6b7280'}" stroke-width="14" stroke-linecap="round" opacity=".85"/>`;});
 paths+=`<text x="${cx}" y="${cy-4}" text-anchor="middle" fill="#111827" font-size="16" font-weight="700">₩${fmt(total)}</text><text x="${cx}" y="${cy+14}" text-anchor="middle" fill="#9ca3af" font-size="10">총 지출</text>`;
 $('donutSvg').innerHTML=paths;
 $('legend').innerHTML=entries.sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="li"><div class="ld" style="background:${CC[k]}"></div>${k} <span style="font-size:11px;color:var(--t4);font-weight:600">${(v/total*100).toFixed(0)}%</span></div>`).join('');
-// ★ 5번: 변동 표시
 const el=$('assetSummaryArea');const months=Object.keys(ALL_DATA).sort();const ci=months.indexOf(curMonth);const pm=ci>0?months[ci-1]:null;const pD=pm?ALL_DATA[pm]:null;
 const cats=['고정비','식비','생필품비','고양이비','가족비'];const cur={},prev={};
 hh.filter(r=>{const c=r.category||'';return c!=='입금'&&c!=='수입'&&c!=='이월';}).forEach(r=>{if(cats.includes(r.category))cur[r.category]=(cur[r.category]||0)+Math.abs(N(r.amount));});
@@ -260,7 +258,6 @@ function openExtraAdd(dk){extraEditCtx={dk,i:-1};$('extraModalTitle').textConten
 function openExtraEdit(dk,i){const it=D[dk][i];if(!it)return;extraEditCtx={dk,i};$('extraModalTitle').textContent='기타 지출 수정';$('extraModalFields').innerHTML=`<div><label>항목</label><input id="ex-item" class="fi" value="${it.item}"></div><div><label>금액</label><input type="number" id="ex-amt" class="fi" value="${it.amount}"></div>`;$('btnDeleteExtra').style.display='block';$('btnDeleteExtra').onclick=async()=>{D[dk].splice(i,1);closeModal('extraModal');render();const who=dk==='goeunExtra'?'고은':'형환';await gasPost({action:'syncExtra',month:curMonth,who,items:D[dk]});toast('기타지출 삭제 반영됨');};openModal('extraModal');}
 $('btnSaveExtra').onclick=async()=>{if(!extraEditCtx)return;const item=$('ex-item').value.trim(),amount=N($('ex-amt').value);if(!item)return;const{dk,i}=extraEditCtx;if(i>=0)D[dk][i]={item,amount};else{if(!D[dk])D[dk]=[];D[dk].push({item,amount});}closeModal('extraModal');render();const who=dk==='goeunExtra'?'고은':'형환';await gasPost({action:'syncExtra',month:curMonth,who,items:D[dk]});toast('기타지출 저장됨');extraEditCtx=null;};
 
-// ★ 1번: 여행저금통 — 날짜 YYYY-MM-DD, 행 클릭 수정/삭제
 function renderTravel(){const d=sharedTravel;let b=0;d.forEach(r=>{b+=r.inp-r.out;r.balance=b;});
 const ti=d.reduce((s,r)=>s+r.inp,0),to=d.reduce((s,r)=>s+r.out,0),bal=d.length?d[d.length-1].balance:0;
 $('travelBal').textContent=(bal<0?'-':'')+'₩'+fmt(Math.abs(bal));$('travelBal').style.color=bal>=0?'var(--green)':'var(--red)';
@@ -276,7 +273,6 @@ $('btnSaveTravelEdit').onclick=async()=>{if(travelEditIdx<0)return;const r=share
 $('btnDeleteTravel').onclick=async()=>{if(travelEditIdx<0)return;sharedTravel.splice(travelEditIdx,1);closeModal('travelEditModal');render();toast('여행저금통 삭제됨 (시트 수동 반영 필요)','info');travelEditIdx=-1;};
 $('btnCloseTravelEdit').onclick=()=>{closeModal('travelEditModal');travelEditIdx=-1;};
 
-// ★ 2번: 자금현황 추가/수정
 function sumA(o){return N(o.cash)+N(o.savings)+N(o.stock)+N(o.pension)+N(o.etc)}
 function renderAssets(){const el=$('assetsList');const lb=['현금','청약','증권','연금','기타'],ks=['cash','savings','stock','pension','etc'];
 el.innerHTML=sharedAssets.map((a,ai)=>{const gT=sumA(a.goeun||{}),hT=sumA(a.hyunghwan||{});const c=gT+hT;let cd='';if(ai<sharedAssets.length-1){const p=sharedAssets[ai+1];const d=c-(sumA(p.goeun||{})+sumA(p.hyunghwan||{}));cd=d>0?`<span class="chg-more">₩${fmt(d)} 더 쓰고 있어요</span>`:d<0?`<span class="chg-less">₩${fmt(Math.abs(d))} 덜 쓰고 있어요</span>`:'';}
@@ -296,7 +292,6 @@ $('btnSaveAsset').onclick=()=>{const obj={period:$('am-period').value.trim(),goe
 $('btnDeleteAsset').onclick=()=>{if(assetEditIdx<0)return;sharedAssets.splice(assetEditIdx,1);closeModal('assetModal');render();toast('자금현황 삭제됨','info');};
 $('btnCloseAsset').onclick=()=>closeModal('assetModal');
 
-// ★ 3번: 총괄계획 — 비고란 추가, 추가 버튼
 function renderPlan(){const p=sharedPlan,el=$('planGrid');const iT=p.income.reduce((s,i)=>s+i.amount,0),fT=p.fixed.reduce((s,i)=>s+i.amount,0),lT=p.living.reduce((s,i)=>s+i.amount,0),aT=p.allowance.reduce((s,i)=>s+i.amount,0);const cats=[...new Set(p.fixed.map(f=>f.cat))];
 el.innerHTML=`<div class="pc"><h4>💵 수입</h4>${p.income.map(i=>`<div class="pr" onclick="openPlanEdit('income',${i.id})"><span class="l">${i.item}${i.note?' ('+i.note+')':''}</span><span class="rv">₩${fmt(i.amount)}</span></div>`).join('')}<div class="pr tot"><span class="l">총계</span><span class="rv">₩${fmt(iT)}</span></div><div class="pr noclick" style="margin-top:8px"><span class="l">고정비 제외</span><span class="rv" style="color:var(--green)">₩${fmt(iT-fT)}</span></div></div>
 <div class="pc"><h4>🏠 고정비</h4>${cats.map(c=>`<div style="margin-bottom:10px"><div style="font-size:13px;color:var(--accent);margin-bottom:4px;font-weight:600">${c}</div>${p.fixed.filter(f=>f.cat===c).map(i=>`<div class="pr" onclick="openPlanEdit('fixed',${i.id})"><span class="l">${i.who}·${i.item}${i.note?' ('+i.note+')':''}</span><span class="rv">₩${fmt(i.amount)}</span></div>`).join('')}</div>`).join('')}<div class="pr tot"><span class="l">총계</span><span class="rv">₩${fmt(fT)}</span></div></div>
@@ -313,7 +308,6 @@ function savePlanItem(){if(!planEditCtx)return;const{sec,id,isNew}=planEditCtx;c
 if(sec==='fixed'){const cat=$('pl-cat').value.trim()||'기타',who=$('pl-who').value.trim()||'공동';if(isNew)sharedPlan.fixed.push({id:plNid++,cat,who,item,amount,note});else{const x=sharedPlan.fixed.find(f=>f.id===id);if(x){x.cat=cat;x.who=who;x.item=item;x.amount=amount;x.note=note;}}}
 else{if(isNew)sharedPlan[sec].push({id:plNid++,item,amount,note});else{const x=sharedPlan[sec].find(f=>f.id===id);if(x){x.item=item;x.amount=amount;x.note=note;}}}closeModal('planModal');planEditCtx=null;render();}
 
-// ★ 3번: 총괄계획 추가 팝업
 $('btnAddPlan').onclick=()=>{$('pa-sec').value='income';$('pa-item').value='';$('pa-amt').value='';$('pa-cat').value='';$('pa-who').value='';$('pa-note').value='';togglePlanAddExtra();openModal('planAddModal');};
 $('pa-sec').onchange=togglePlanAddExtra;
 function togglePlanAddExtra(){const v=$('pa-sec').value;$('pa-extra-fixed').style.display=v==='fixed'?'block':'none';$('pa-extra-who').style.display=v==='fixed'?'block':'none';}
