@@ -92,8 +92,7 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 .tv-tab.all{border-style:dashed}
 .modal-bg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);z-index:100;align-items:center;justify-content:center}
 .modal-bg.show{display:flex}
-.modal{background:#fff;padding:24px;width:90%;max-width:500px;max-height:80vh;overflow-y:auto;overflow-x:hidden;box-shadow:0 20px 60px rgba(0,0,0,.15);border-radius:18px !important;-webkit-border-radius:18px !important;-moz-border-radius:18px !important}
-.modal-bg.show{display:flex;align-items:center;justify-content:center}
+.modal-bg .modal{background:#fff;padding:24px;width:90%;max-width:500px;max-height:80vh;overflow:hidden auto;box-shadow:0 20px 60px rgba(0,0,0,.15);border-top-left-radius:18px;border-top-right-radius:18px;border-bottom-left-radius:18px;border-bottom-right-radius:18px}
 .modal h3{font-size:18px;font-weight:600;margin-bottom:16px}.modal .fg{grid-template-columns:1fr 1fr}
 .asset-summary{background:#f9fafb;border:1px solid var(--border);border-radius:14px;padding:16px}
 .asset-summary .as-title{font-size:13px;color:var(--t4);margin-bottom:10px;font-weight:600}
@@ -148,7 +147,7 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 <div class="toast" id="toast"></div>
 
 <script>
-const GAS="https://script.google.com/macros/s/AKfycbwbFH8X33jqgBMek80xNDd3ZarsbP82OS0A-mYDaLB-fhJ7MGpva5JSAhb5O-iPvHVo/exec";
+const GAS="https://script.google.com/macros/s/AKfycbxvn8Y84WQPj9BJPn9x8TQXh_ZPzo3prBWlkbB0j1o0uAmxH6kJ22gCD3h8QvHNlkOK/exec";
 const JEONSE=350000000; // 전세금 3억5천 고정
 
 const CC={"입금":"#059669","수입":"#059669","이월":"#6366f1","고정비":"#6366f1","식비":"#d97706","생필품비":"#ec4899","고양이비":"#8b5cf6","가족비":"#dc2626","경조사비":"#dc2626","미용":"#ec4899","취미":"#3b82f6","관계":"#14b8a6","교통":"#a855f7","기타":"#9ca3af","병원":"#06b6d4","구독":"#8b5cf6","여행저금통":"#d97706","선물":"#ec4899","컨텐츠":"#3b82f6","사무용품":"#9ca3af","생활용품":"#ec4899"};
@@ -366,11 +365,19 @@ function openBudgetModal(i){
     }else{
       const raw=$('bdg-val').value.trim();b.budget=evalFormula(raw);b.formula=raw.startsWith('=')?raw:'';
     }
-    b.memo=($('bdg-memo')||{}).value?.trim()||'';
+    const memoEl=$('bdg-memo');b.memo=memoEl?memoEl.value.trim():'';
     closeModal('budgetModal');render();
-    // budget 전체를 subItems/memo 포함해서 전송
-    const budgetsToSave=D.budget.map(x=>({category:x.category,budget:x.budget,subItems:x.subItems||undefined,memo:x.memo||undefined,formula:x.formula||undefined}));
-    await gasPost({action:'writeBudget',month:curMonth,budgets:budgetsToSave});toast('예산 저장됨');
+    const budgetsToSave=D.budget.map(x=>{
+      const o={category:x.category,budget:x.budget};
+      if(x.subItems&&Object.keys(x.subItems).length)o.subItems=x.subItems;
+      if(x.memo)o.memo=x.memo;
+      if(x.formula)o.formula=x.formula;
+      return o;
+    });
+    await gasPost({action:'writeBudget',month:curMonth,budgets:budgetsToSave}).then(r=>{
+      if(r?.success)toast('예산 저장됨');
+      else toast('예산 저장 실패 - GAS v6.0 업데이트 필요','err');
+    });
   };
   openModal('budgetModal');
 }
