@@ -92,7 +92,8 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 .tv-tab.all{border-style:dashed}
 .modal-bg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);z-index:100;align-items:center;justify-content:center}
 .modal-bg.show{display:flex}
-.modal{background:#fff;border-radius:18px;padding:24px;width:90%;max-width:500px;max-height:80vh;overflow-y:auto;overflow-x:hidden;box-shadow:0 20px 60px rgba(0,0,0,.15);-webkit-border-radius:18px}
+.modal{background:#fff;padding:24px;width:90%;max-width:500px;max-height:80vh;overflow-y:auto;overflow-x:hidden;box-shadow:0 20px 60px rgba(0,0,0,.15);border-radius:18px !important;-webkit-border-radius:18px !important;-moz-border-radius:18px !important}
+.modal-bg.show{display:flex;align-items:center;justify-content:center}
 .modal h3{font-size:18px;font-weight:600;margin-bottom:16px}.modal .fg{grid-template-columns:1fr 1fr}
 .asset-summary{background:#f9fafb;border:1px solid var(--border);border-radius:14px;padding:16px}
 .asset-summary .as-title{font-size:13px;color:var(--t4);margin-bottom:10px;font-weight:600}
@@ -147,7 +148,7 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 <div class="toast" id="toast"></div>
 
 <script>
-const GAS="https://script.google.com/macros/s/AKfycbyDO8IQpbJ-LAuWDtCuKluS81e7jypYjbgAiUcP-hcHog9P78Lw0OIVM6cbYqXIbl-3/exec";
+const GAS="https://script.google.com/macros/s/AKfycbwbFH8X33jqgBMek80xNDd3ZarsbP82OS0A-mYDaLB-fhJ7MGpva5JSAhb5O-iPvHVo/exec";
 const JEONSE=350000000; // 전세금 3억5천 고정
 
 const CC={"입금":"#059669","수입":"#059669","이월":"#6366f1","고정비":"#6366f1","식비":"#d97706","생필품비":"#ec4899","고양이비":"#8b5cf6","가족비":"#dc2626","경조사비":"#dc2626","미용":"#ec4899","취미":"#3b82f6","관계":"#14b8a6","교통":"#a855f7","기타":"#9ca3af","병원":"#06b6d4","구독":"#8b5cf6","여행저금통":"#d97706","선물":"#ec4899","컨텐츠":"#3b82f6","사무용품":"#9ca3af","생활용품":"#ec4899"};
@@ -181,7 +182,10 @@ function sortAndRecalc(arr){
 
 async function syncToSheet(key){sortAndRecalc(D[key]);render();const rows=D[key].map(r=>({date:r.date,category:r.category,detail:r.detail,amount:r.amount,balance:r.balance,note:r.note||''}));toast('시트 동기화 중...','info');const r=await gasPost({action:'syncSection',sheet:SHEET_NAME[key],month:curMonth,rows});if(r?.success)toast('✓ 시트 저장 완료 ('+r.count+'건)');}
 
-const ALL_DATA={};let curMonth="2026-02",D=null;
+const ALL_DATA={};
+// 현재 월을 오늘 날짜 기준으로 초기화
+let curMonth=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');})();
+let D=null;
 const catFilters={household:null,goeun:null,hyunghwan:null};
 const sharedTravel=[],sharedAssets=[];
 let travelMonthFilter='all';
@@ -626,7 +630,12 @@ function applyAllData(result){
   }
   if(months.length){
     const sel=$('monthPicker');const localMonths=Object.keys(ALL_DATA).filter(m=>!months.includes(m));const allMonths=[...new Set([...months,...localMonths])].sort().reverse();sel.innerHTML='';allMonths.forEach(m=>{const o=document.createElement('option');const[y,mo]=m.split('-');o.value=m;o.textContent=`${y}년 ${parseInt(mo)}월`;sel.appendChild(o);});
-    if(allMonths.includes(curMonth))sel.value=curMonth;else{curMonth=allMonths[0];sel.value=curMonth;}
+    if(allMonths.includes(curMonth))sel.value=curMonth;else{
+      // 오늘 기준 월이 목록에 있으면 선택, 없으면 최신 월
+      const todayMonth=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');})();
+      if(allMonths.includes(todayMonth)){curMonth=todayMonth;sel.value=curMonth;}
+      else{curMonth=allMonths[0];sel.value=curMonth;}
+    }
   }
   $('loadingSkeleton').style.display='none';
   loadMonth(curMonth);
