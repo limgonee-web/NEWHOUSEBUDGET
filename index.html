@@ -108,7 +108,7 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 </head>
 <body>
 <div class="header"><div class="header-inner">
-<div class="header-top"><div style="display:flex;align-items:center;gap:6px"><h1>💰 상도댁 가계부</h1><span class="sync-ind ok" id="syncBadge">✓ 연결됨</span></div><select class="mi" id="monthPicker"></select></div>
+<div class="header-top"><div style="display:flex;align-items:center;gap:6px"><h1>💰 상도댁 가계부</h1><span class="sync-ind ok" id="syncBadge">✓ 연결됨</span></div><div style="display:flex;align-items:center;gap:8px"><button class="ab" id="btnAddMonth" style="padding:7px 14px;font-size:13px">+ 새 월</button><select class="mi" id="monthPicker"></select></div></div>
 <div class="tabs">
 <button class="tb active" data-tab="overview">📊 현황</button><button class="tb" data-tab="household">🏠 가계부</button><button class="tb" data-tab="goeun">🧶 고은</button><button class="tb" data-tab="hyunghwan">🎮 형환</button><button class="tb" data-tab="travel">✈️ 여행저금통</button><button class="tb" data-tab="assets">💎 자금현황</button><button class="tb" data-tab="plan">📋 총괄계획</button>
 </div></div></div>
@@ -194,7 +194,7 @@ function resetNid(key, data){
 }
 
 let nid={household:1,goeun:1,hyunghwan:1};
-const ALL_DATA={};let curMonth="2026-02",D=null;
+const ALL_DATA={};let curMonth="2026-02",D=null; // curMonth는 applyAllData에서 최신 월로 업데이트됨
 const catFilters={household:null,goeun:null,hyunghwan:null};
 const sharedTravel=[],sharedAssets=[];
 
@@ -210,7 +210,37 @@ function loadMonth(m){curMonth=m;D=ALL_DATA[m];if(!D){D=emptyMonth();ALL_DATA[m]
 function closeModal(id){$(id).classList.remove('show');}
 function openModal(id){$(id).classList.add('show');}
 
-(function(){const sel=$('monthPicker');["2026-03","2026-02","2026-01","2025-12","2025-11","2025-10","2025-09"].forEach(m=>{const o=document.createElement('option');const[y,mo]=m.split('-');o.value=m;o.textContent=`${y}년 ${parseInt(mo)}월`;sel.appendChild(o);});sel.value="2026-02";sel.addEventListener('change',e=>loadMonth(e.target.value));})();
+(function(){
+  const sel=$('monthPicker');
+  sel.addEventListener('change',e=>loadMonth(e.target.value));
+  // 월 목록은 GAS 로드 후 applyAllData에서 채워짐 — 초기 플레이스홀더만
+  const o=document.createElement('option');o.value='';o.textContent='로딩 중...';o.disabled=true;o.selected=true;
+  sel.appendChild(o);
+})();
+
+// ★ 새 월 추가
+function addNextMonth(){
+  const sel=$('monthPicker');
+  const months=[...sel.options].map(o=>o.value).filter(v=>v).sort();
+  // 현재 목록의 가장 최신 월 다음 달 계산
+  const latest=months[months.length-1]||curMonth;
+  const[y,mo]=latest.split('-').map(Number);
+  const nm=mo===12?`${y+1}-01`:`${y}-${String(mo+1).padStart(2,'0')}`;
+  if([...sel.options].some(o=>o.value===nm)){
+    // 이미 있으면 그냥 이동
+    sel.value=nm; loadMonth(nm); return;
+  }
+  // 드롭다운에 추가
+  const o=document.createElement('option');
+  const[ny,nmo]=nm.split('-');
+  o.value=nm; o.textContent=`${ny}년 ${parseInt(nmo)}월`;
+  // 최신 순서(맨 위)에 삽입
+  sel.insertBefore(o,sel.firstChild);
+  sel.value=nm;
+  loadMonth(nm);
+  toast(`${ny}년 ${parseInt(nmo)}월 추가됨 — 항목을 입력하면 시트에 자동 저장돼요`,'info');
+}
+$('btnAddMonth').onclick=addNextMonth;
 document.querySelectorAll('.tb').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
 
 function getBal(arr){if(!arr||!arr.length)return 0;const s=arr.slice().sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.id||0)-(b.id||0));return s[s.length-1].balance||0;}
@@ -456,7 +486,19 @@ function applyAllData(result){
   }
   if(result.travel?.length){sharedTravel.length=0;result.travel.forEach((r,i)=>sharedTravel.push({id:i+1,...r}));}
   if(result.assets?.length){sharedAssets.length=0;result.assets.forEach((a,i)=>sharedAssets.push({id:i+1,...a}));}
-  if(months.length){const sel=$('monthPicker');const sorted=months.slice().sort().reverse();sel.innerHTML='';sorted.forEach(m=>{const o=document.createElement('option');const[y,mo]=m.split('-');o.value=m;o.textContent=`${y}년 ${parseInt(mo)}월`;sel.appendChild(o);});if(months.includes(curMonth))sel.value=curMonth;else{curMonth=sorted[0];sel.value=curMonth;}}
+  if(months.length){
+    const sel=$('monthPicker');
+    // GAS 월 목록 + 로컬에서 추가한 월(ALL_DATA에 있는 것) 합산
+    const localMonths=Object.keys(ALL_DATA).filter(m=>!months.includes(m));
+    const allMonths=[...new Set([...months,...localMonths])].sort().reverse();
+    const prevVal=sel.value;
+    sel.innerHTML='';
+    allMonths.forEach(m=>{const o=document.createElement('option');const[y,mo]=m.split('-');o.value=m;o.textContent=`${y}년 ${parseInt(mo)}월`;sel.appendChild(o);});
+    // 현재 선택 유지 (새로 추가한 월 포함)
+    if(allMonths.includes(curMonth))sel.value=curMonth;
+    else if(allMonths.includes(prevVal)){sel.value=prevVal;curMonth=prevVal;}
+    else{curMonth=allMonths[0];sel.value=curMonth;}
+  }
   loadMonth(curMonth);
 }
 
