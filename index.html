@@ -147,7 +147,7 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 <div class="toast" id="toast"></div>
 
 <script>
-const GAS="https://script.google.com/macros/s/AKfycbwbFH8X33jqgBMek80xNDd3ZarsbP82OS0A-mYDaLB-fhJ7MGpva5JSAhb5O-iPvHVo/exec";
+const GAS="https://script.google.com/macros/s/AKfycbyDO8IQpbJ-LAuWDtCuKluS81e7jypYjbgAiUcP-hcHog9P78Lw0OIVM6cbYqXIbl-3/exec";
 const JEONSE=350000000; // 전세금 3억5천 고정
 
 const CC={"입금":"#059669","수입":"#059669","이월":"#6366f1","고정비":"#6366f1","식비":"#d97706","생필품비":"#ec4899","고양이비":"#8b5cf6","가족비":"#dc2626","경조사비":"#dc2626","미용":"#ec4899","취미":"#3b82f6","관계":"#14b8a6","교통":"#a855f7","기타":"#9ca3af","병원":"#06b6d4","구독":"#8b5cf6","여행저금통":"#d97706","선물":"#ec4899","컨텐츠":"#3b82f6","사무용품":"#9ca3af","생활용품":"#ec4899"};
@@ -191,9 +191,9 @@ let sharedPlan={income:[{id:1,item:"형환 월급(성과급 포함x)",amount:320
 let extraEditCtx=null,planEditCtx=null,editMemoIdx=-1,editCtx=null,plNid=100,travelEditIdx=-1;
 
 async function syncPlanToSheet(){
-  toast('총괄계획 시트 동기화 중...','info');
   const r=await gasPost({action:'syncPlan',plan:sharedPlan});
-  if(r?.success)toast('✓ 총괄계획 시트 저장 완료');
+  if(r?.success)toast('✓ 총괄계획 저장 완료');
+  else if(r?.error?.includes('Unknown action'))toast('GAS를 v6.0으로 업데이트해주세요 (syncPlan 미지원)','err');
 }
 
 function switchTab(n){document.querySelectorAll('.tb').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tc').forEach(x=>x.classList.remove('active'));document.querySelector(`.tb[data-tab="${n}"]`)?.classList.add('active');$('tab-'+n)?.classList.add('active');}
@@ -362,9 +362,11 @@ function openBudgetModal(i){
     }else{
       const raw=$('bdg-val').value.trim();b.budget=evalFormula(raw);b.formula=raw.startsWith('=')?raw:'';
     }
-    b.memo=$('bdg-memo').value.trim();
+    b.memo=($('bdg-memo')||{}).value?.trim()||'';
     closeModal('budgetModal');render();
-    await gasPost({action:'writeBudget',month:curMonth,budgets:D.budget});toast('예산 저장됨');
+    // budget 전체를 subItems/memo 포함해서 전송
+    const budgetsToSave=D.budget.map(x=>({category:x.category,budget:x.budget,subItems:x.subItems||undefined,memo:x.memo||undefined,formula:x.formula||undefined}));
+    await gasPost({action:'writeBudget',month:curMonth,budgets:budgetsToSave});toast('예산 저장됨');
   };
   openModal('budgetModal');
 }
@@ -457,7 +459,8 @@ function openManualBudget(){
     const budgets=saveBudgetFromSetup();
     if(!budgets.length){toast('최소 하나 이상 입력해 주세요','err');return;}
     D.budget=budgets;closeModal('budgetModal');render();
-    await gasPost({action:'writeBudget',month:curMonth,budgets:D.budget});toast('✓ 예산 저장 완료');
+    const bSave=D.budget.map(x=>({category:x.category,budget:x.budget,subItems:x.subItems||undefined,memo:x.memo||undefined,formula:x.formula||undefined}));
+    await gasPost({action:'writeBudget',month:curMonth,budgets:bSave});toast('✓ 예산 저장 완료');
   };
   openModal('budgetModal');
 }
@@ -471,7 +474,8 @@ function openBudgetSetupEdit(){
   $('btnSaveBudget').onclick=async()=>{
     const budgets=saveBudgetFromSetup();
     D.budget=budgets;closeModal('budgetModal');render();
-    await gasPost({action:'writeBudget',month:curMonth,budgets:D.budget});toast('✓ 예산 저장 완료');
+    const bSave2=D.budget.map(x=>({category:x.category,budget:x.budget,subItems:x.subItems||undefined,memo:x.memo||undefined,formula:x.formula||undefined}));
+    await gasPost({action:'writeBudget',month:curMonth,budgets:bSave2});toast('✓ 예산 저장 완료');
   };
   openModal('budgetModal');
 }
