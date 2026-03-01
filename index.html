@@ -302,9 +302,51 @@ const curT=cats.reduce((s,c)=>s+(cur[c]||0),0),prevT=cats.reduce((s,c)=>s+(prev[
 if(!pD){el.innerHTML=`<div class="asset-summary"><div class="as-title">📊 이번 달 지출</div>${cats.map(c=>`<div class="as-row"><span class="l">${c}</span><span class="v">₩${fmt(cur[c]||0)}</span></div>`).join('')}<div class="as-total"><span>합계</span><span class="v">₩${fmt(curT)}</span></div></div>`;}
 else{const mo=parseInt(curMonth.split('-')[1]),pmo=parseInt(pm.split('-')[1]);el.innerHTML=`<div class="asset-summary"><div class="as-title">📈 ${pmo}월→${mo}월 변동</div>${cats.map(c=>`<div class="as-row"><span class="l">${c}</span><span class="v">${chgText((cur[c]||0)-(prev[c]||0))}</span></div>`).join('')}<div class="as-total"><span>합계</span><span class="v">${chgText(curT-prevT)}</span></div></div>`;}}
 
-function openBudgetModal(i){const b=D.budget[i];$('budgetModalFields').innerHTML=`<div style="margin-bottom:16px"><div style="font-size:15px;font-weight:600;margin-bottom:10px">${b.category}</div><div class="fg" style="grid-template-columns:1fr"><div><label>예산</label><input id="bdg-val" class="fi" value="${b.formula||b.budget}" placeholder="0 또는 =수식"></div><div><label>메모</label><input id="bdg-memo" class="fi" value="${b.memo||''}"></div></div></div>`;
-$('btnSaveBudget').onclick=async()=>{const raw=$('bdg-val').value.trim();b.budget=evalFormula(raw);b.formula=raw.startsWith('=')?raw:'';b.memo=$('bdg-memo').value.trim();closeModal('budgetModal');render();await gasPost({action:'writeBudget',month:curMonth,budgets:D.budget});toast('예산 저장됨');};
-openModal('budgetModal');}
+function openBudgetModal(i){
+  const b=D.budget[i];
+  // 해당 카테고리 지출 내역 수집
+  const rows=(D.household||[]).filter(r=>r.category===b.category&&r.category!=='입금'&&r.category!=='수입'&&r.category!=='이월');
+  const sp=rows.reduce((s,r)=>s+Math.abs(N(r.amount)),0);
+  const bg=N(b.budget);
+  const pct=bg>0?(sp/bg*100).toFixed(0)+'%':'-';
+  const ov=sp>bg;
+
+  const txList=rows.length
+    ? rows.slice().sort((a,b)=>a.date>b.date?-1:1).map(r=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:13px">
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="color:var(--t5);white-space:nowrap">${fmtD(r.date)}</span>
+            <span style="color:var(--t3)">${r.detail||'-'}</span>
+            ${r.note?`<span style="color:var(--t5);font-style:italic">${r.note}</span>`:''}
+          </div>
+          <span style="font-weight:600;color:var(--red);white-space:nowrap;margin-left:12px">₩${fmt(Math.abs(r.amount))}</span>
+        </div>`).join('')+`
+        <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;font-weight:700;border-top:2px solid var(--border);margin-top:2px">
+          <span>합계</span><span style="color:${ov?'var(--red)':'var(--t1)'}">₩${fmt(sp)}</span>
+        </div>`
+    : `<div style="color:var(--t5);font-size:13px;padding:12px 0;text-align:center">이번 달 지출 내역이 없어요</div>`;
+
+  $('budgetModalFields').innerHTML=`
+    <div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-size:17px;font-weight:700">${b.category}</span>
+        <span style="font-size:13px;font-weight:700;padding:3px 12px;border-radius:20px;background:${ov?'#fef2f2':'#f0fdf4'};color:${ov?'#dc2626':'#059669'}">${pct}</span>
+      </div>
+      <div style="background:#f9fafb;border-radius:12px;padding:14px;margin-bottom:16px">
+        <div style="font-size:12px;color:var(--t5);font-weight:600;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">이번 달 내역</div>
+        <div style="max-height:180px;overflow-y:auto">${txList}</div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px">
+        <div style="font-size:12px;color:var(--t5);font-weight:600;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">예산 수정</div>
+        <div class="fg" style="grid-template-columns:1fr">
+          <div><label>예산</label><input id="bdg-val" class="fi" value="${b.formula||b.budget}" placeholder="0 또는 =수식"></div>
+          <div><label>메모</label><input id="bdg-memo" class="fi" value="${b.memo||''}"></div>
+        </div>
+      </div>
+    </div>`;
+  $('btnSaveBudget').onclick=async()=>{const raw=$('bdg-val').value.trim();b.budget=evalFormula(raw);b.formula=raw.startsWith('=')?raw:'';b.memo=$('bdg-memo').value.trim();closeModal('budgetModal');render();await gasPost({action:'writeBudget',month:curMonth,budgets:D.budget});toast('예산 저장됨');};
+  openModal('budgetModal');
+}
 
 // ★ 예산 설정 함수들
 const DEFAULT_BUDGET_CATS=['고정비','식비','생필품비','고양이비','가족비','경조사비','여행저금통'];
@@ -312,6 +354,16 @@ const DEFAULT_BUDGET_CATS=['고정비','식비','생필품비','고양이비','�
 function getPrevMonth(m){
   const[y,mo]=m.split('-').map(Number);
   return mo===1?`${y-1}-12`:`${y}-${String(mo-1).padStart(2,'0')}`;
+}
+
+function updateBudgetTotal(){
+  const total=DEFAULT_BUDGET_CATS.reduce((s,cat)=>{
+    const el=document.getElementById('mbudget-'+cat);
+    return s+(el?evalFormula(el.value):0);
+  },0);
+  const td=$('budgetTotalDisplay'),hd=$('budgetHalfDisplay');
+  if(td) td.textContent='₩'+fmt(total);
+  if(hd) hd.textContent='₩'+fmt(Math.round(total/2));
 }
 
 // 직전 월 예산 복사
@@ -341,8 +393,19 @@ function openManualBudget(){
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
         <span style="width:90px;font-size:14px;font-weight:500;color:var(--t3);flex-shrink:0">${cat}</span>
         <input id="mbudget-${cat}" class="fi" style="flex:1" placeholder="0 또는 =수식"
-          value="${prevMap[cat]||''}" >
-      </div>`).join('')}`;
+          value="${prevMap[cat]||''}" oninput="updateBudgetTotal()">
+      </div>`).join('')}
+    <div style="border-top:2px solid var(--border);margin-top:14px;padding-top:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:14px;font-weight:700;color:var(--t1)">총계</span>
+        <span id="budgetTotalDisplay" style="font-size:16px;font-weight:700;color:var(--accent)">₩0</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;background:#f5f3ff;padding:10px 14px;border-radius:10px">
+        <span style="font-size:13px;color:var(--accent);font-weight:600">👤 1인당 (÷2)</span>
+        <span id="budgetHalfDisplay" style="font-size:15px;font-weight:700;color:var(--accent)">₩0</span>
+      </div>
+    </div>`;
+  updateBudgetTotal();
 
   $('btnSaveBudget').onclick=async()=>{
     const budgets=DEFAULT_BUDGET_CATS
@@ -367,8 +430,19 @@ function openBudgetSetupEdit(){
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
         <span style="width:90px;font-size:14px;font-weight:500;color:var(--t3);flex-shrink:0">${cat}</span>
         <input id="mbudget-${cat}" class="fi" style="flex:1" placeholder="0 또는 =수식"
-          value="${b?b.budget:''}" >
-      </div>`;}).join('')}`;
+          value="${b?b.formula||b.budget:''}" oninput="updateBudgetTotal()">
+      </div>`;}).join('')}
+    <div style="border-top:2px solid var(--border);margin-top:14px;padding-top:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:14px;font-weight:700;color:var(--t1)">총계</span>
+        <span id="budgetTotalDisplay" style="font-size:16px;font-weight:700;color:var(--accent)">₩0</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;background:#f5f3ff;padding:10px 14px;border-radius:10px">
+        <span style="font-size:13px;color:var(--accent);font-weight:600">👤 1인당 (÷2)</span>
+        <span id="budgetHalfDisplay" style="font-size:15px;font-weight:700;color:var(--accent)">₩0</span>
+      </div>
+    </div>`;
+  updateBudgetTotal();
 
   $('btnSaveBudget').onclick=async()=>{
     const budgets=DEFAULT_BUDGET_CATS
@@ -389,18 +463,18 @@ function openEditModal(key,id){
 const row=D[key].find(r=>r.id===id);if(!row)return;editCtx={key,id};
 const cats=key==='household'?['입금','고정비','식비','생필품비','고양이비','가족비','경조사비','여행저금통']:key==='goeun'?['입금','식비','미용','취미','관계','교통','병원','구독','생필품비','기타']:['입금','식비','미용','취미','관계','교통','선물','구독','컨텐츠','사무용품','생활용품','기타'];
 $('editModalTitle').textContent='항목 수정';
-$('editModalFields').innerHTML=`<div><label>날짜</label><input type="date" id="em-date" class="fi" value="${row.date}"></div><div><label>항목</label><select id="em-cat" class="fi">${cats.map(c=>`<option${c===row.category?' selected':''}>${c}</option>`).join('')}</select></div><div><label>상세</label><input id="em-detail" class="fi" value="${row.detail}"></div><div><label>금액</label><input id="em-amount" class="fi" value="${Math.abs(row.amount)}" placeholder="0 또는 =수식"></div><div style="grid-column:1/-1"><label>비고</label><input id="em-note" class="fi" value="${row.note||''}"></div>`;
+$('editModalFields').innerHTML=`<div><label>날짜</label><input type="date" id="em-date" class="fi" value="${row.date}"></div><div><label>항목</label><select id="em-cat" class="fi">${cats.map(c=>`<option${c===row.category?' selected':''}>${c}</option>`).join('')}</select></div><div><label>상세</label><input id="em-detail" class="fi" value="${row.detail}"></div><div><label>금액</label><input id="em-amount" class="fi" value="${row.formula||Math.abs(row.amount)}" placeholder="0 또는 =수식"></div><div style="grid-column:1/-1"><label>비고</label><input id="em-note" class="fi" value="${row.note||''}"></div>`;
 $('btnDeleteEdit').style.display='block';
 $('btnDeleteEdit').onclick=async()=>{D[editCtx.key]=D[editCtx.key].filter(r=>r.id!==editCtx.id);closeModal('editModal');await syncToSheet(editCtx.key);editCtx=null;};
-$('btnSaveEdit').onclick=async()=>{if(!editCtx)return;const r=D[editCtx.key].find(x=>x.id===editCtx.id);if(!r)return;r.date=$('em-date').value;r.category=$('em-cat').value;r.detail=$('em-detail').value;r.amount=evalFormula($('em-amount').value);r.note=$('em-note').value;closeModal('editModal');await syncToSheet(editCtx.key);editCtx=null;};
+$('btnSaveEdit').onclick=async()=>{if(!editCtx)return;const r=D[editCtx.key].find(x=>x.id===editCtx.id);if(!r)return;r.date=$('em-date').value;r.category=$('em-cat').value;r.detail=$('em-detail').value;const _raw=$('em-amount').value.trim();r.formula=_raw.startsWith('=')?_raw:'';r.amount=evalFormula(_raw);r.note=$('em-note').value;closeModal('editModal');await syncToSheet(editCtx.key);editCtx=null;};
 openModal('editModal');}
 
 function renderExtra(id,data,dk,title){const el=$(id);const total=data?.reduce((s,d)=>s+d.amount,0)||0;
 el.innerHTML=`<div class="pn" style="margin-top:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:14px;color:var(--t4);font-weight:500">${title}</div><button class="ab" style="font-size:12px;padding:4px 10px" onclick="openExtraAdd('${dk}')">+ 추가</button></div>${(data||[]).map((d,i)=>`<div class="er" onclick="openExtraEdit('${dk}',${i})"><span>${d.item}</span><span style="color:var(--yellow);font-weight:600">₩${fmt(d.amount)}</span></div>`).join('')}${data?.length?`<div class="er" style="font-weight:700;border-top:2px solid var(--border);padding-top:8px;margin-top:4px;cursor:default"><span style="color:var(--t3)">합계</span><span style="color:var(--red)">₩${fmt(total)}</span></div>`:''}</div>`;}
 
 function openExtraAdd(dk){extraEditCtx={dk,i:-1};$('extraModalTitle').textContent='기타 지출 추가';$('extraModalFields').innerHTML=`<div><label>항목</label><input id="ex-item" class="fi"></div><div><label>금액</label><input id="ex-amt" class="fi" placeholder="0 또는 =수식"></div>`;$('btnDeleteExtra').style.display='none';openModal('extraModal');}
-function openExtraEdit(dk,i){const it=D[dk][i];if(!it)return;extraEditCtx={dk,i};$('extraModalTitle').textContent='기타 지출 수정';$('extraModalFields').innerHTML=`<div><label>항목</label><input id="ex-item" class="fi" value="${it.item}"></div><div><label>금액</label><input id="ex-amt" class="fi" value="${it.amount}" placeholder="0 또는 =수식"></div>`;$('btnDeleteExtra').style.display='block';$('btnDeleteExtra').onclick=async()=>{D[dk].splice(i,1);closeModal('extraModal');render();const who=dk==='goeunExtra'?'고은':'형환';await gasPost({action:'syncExtra',month:curMonth,who,items:D[dk]});toast('기타지출 삭제 반영됨');};openModal('extraModal');}
-$('btnSaveExtra').onclick=async()=>{if(!extraEditCtx)return;const item=$('ex-item').value.trim(),amount=evalFormula($('ex-amt').value);if(!item)return;const{dk,i}=extraEditCtx;if(i>=0)D[dk][i]={item,amount};else{if(!D[dk])D[dk]=[];D[dk].push({item,amount});}closeModal('extraModal');render();const who=dk==='goeunExtra'?'고은':'형환';await gasPost({action:'syncExtra',month:curMonth,who,items:D[dk]});toast('기타지출 저장됨');extraEditCtx=null;};
+function openExtraEdit(dk,i){const it=D[dk][i];if(!it)return;extraEditCtx={dk,i};$('extraModalTitle').textContent='기타 지출 수정';$('extraModalFields').innerHTML=`<div><label>항목</label><input id="ex-item" class="fi" value="${it.item}"></div><div><label>금액</label><input id="ex-amt" class="fi" value="${it.formula||it.amount}" placeholder="0 또는 =수식"></div>`;$('btnDeleteExtra').style.display='block';$('btnDeleteExtra').onclick=async()=>{D[dk].splice(i,1);closeModal('extraModal');render();const who=dk==='goeunExtra'?'고은':'형환';await gasPost({action:'syncExtra',month:curMonth,who,items:D[dk]});toast('기타지출 삭제 반영됨');};openModal('extraModal');}
+$('btnSaveExtra').onclick=async()=>{if(!extraEditCtx)return;const item=$('ex-item').value.trim(),amount=evalFormula($('ex-amt').value);if(!item)return;const _rawEx=$('ex-amt').value.trim(),_fml=_rawEx.startsWith('=')?_rawEx:'';const{dk,i}=extraEditCtx;if(i>=0)D[dk][i]={item,amount,formula:_fml};else{if(!D[dk])D[dk]=[];D[dk].push({item,amount});}closeModal('extraModal');render();const who=dk==='goeunExtra'?'고은':'형환';await gasPost({action:'syncExtra',month:curMonth,who,items:D[dk]});toast('기타지출 저장됨');extraEditCtx=null;};
 
 // ★ FIX 6: 여행저금통 월별 뷰 추가
 function getTravelMonths(){
@@ -442,11 +516,11 @@ function renderTravel(){
 
 function openTravelEdit(i){
   const r=sharedTravel[i];if(!r)return;travelEditIdx=i;
-  $('travelEditFields').innerHTML=`<div><label>날짜</label><input type="date" id="te-date" class="fi" value="${r.date}"></div><div><label>입금</label><input id="te-in" class="fi" value="${r.inp||0}" placeholder="0 또는 =수식"></div><div><label>출금</label><input id="te-out" class="fi" value="${r.out||0}" placeholder="0 또는 =수식"></div><div><label>상세</label><input id="te-detail" class="fi" value="${r.detail||''}"></div>`;
+  $('travelEditFields').innerHTML=`<div><label>날짜</label><input type="date" id="te-date" class="fi" value="${r.date}"></div><div><label>입금</label><input id="te-in" class="fi" value="${r.formulaIn||r.inp||0}" placeholder="0 또는 =수식"></div><div><label>출금</label><input id="te-out" class="fi" value="${r.formulaOut||r.out||0}" placeholder="0 또는 =수식"></div><div><label>상세</label><input id="te-detail" class="fi" value="${r.detail||''}"></div>`;
   openModal('travelEditModal');
 }
 async function syncTravelToSheet(){render();toast('여행저금통 시트 동기화 중...','info');const rows=sharedTravel.map(r=>({date:r.date,inp:r.inp,out:r.out,detail:r.detail,balance:r.balance}));const res=await gasPost({action:'syncTravel',rows});if(res?.success)toast('✓ 여행저금통 시트 저장 완료');else toast('여행저금통 시트 저장 실패','err');}
-$('btnSaveTravelEdit').onclick=async()=>{if(travelEditIdx<0)return;const r=sharedTravel[travelEditIdx];r.date=$('te-date').value;r.inp=evalFormula($('te-in').value);r.out=evalFormula($('te-out').value);r.detail=$('te-detail').value;closeModal('travelEditModal');travelEditIdx=-1;await syncTravelToSheet();};
+$('btnSaveTravelEdit').onclick=async()=>{if(travelEditIdx<0)return;const r=sharedTravel[travelEditIdx];r.date=$('te-date').value;const _ti=$('te-in').value.trim(),_to=$('te-out').value.trim();r.inp=evalFormula(_ti);r.out=evalFormula(_to);r.formulaIn=_ti.startsWith('=')?_ti:'';r.formulaOut=_to.startsWith('=')?_to:'';r.detail=$('te-detail').value;closeModal('travelEditModal');travelEditIdx=-1;await syncTravelToSheet();};
 $('btnDeleteTravel').onclick=async()=>{if(travelEditIdx<0)return;sharedTravel.splice(travelEditIdx,1);closeModal('travelEditModal');travelEditIdx=-1;await syncTravelToSheet();};
 $('btnCloseTravelEdit').onclick=()=>{closeModal('travelEditModal');travelEditIdx=-1;};
 
@@ -525,15 +599,15 @@ async function addItem(key){
   if(!date||!cat)return;
   // ★ FIX 2: nid를 실시간 max+1로 계산
   const newId = (D[key].reduce((m,r)=>Math.max(m,r.id||0),0))+1;
-  D[key].push({id:newId,date,category:cat,detail,amount,balance:0,note});
+  const _rawAmt=$(p+'-amount').value.trim();const _fml=_rawAmt.startsWith('=')?_rawAmt:'';D[key].push({id:newId,date,category:cat,detail,amount,balance:0,note,formula:_fml});
   $(p+'-detail').value='';$(p+'-amount').value='';$(p+'-note').value='';$(p+'-cat').selectedIndex=0;
   toggleForm(key);await syncToSheet(key);
 }
 
 async function addTravel(){
-  const date=$('tv-date').value,inp=evalFormula($('tv-in').value),out=evalFormula($('tv-out').value),detail=$('tv-detail').value;
+  const date=$('tv-date').value,_rawIn=$('tv-in').value.trim(),_rawOut=$('tv-out').value.trim(),inp=evalFormula(_rawIn),out=evalFormula(_rawOut),detail=$('tv-detail').value;
   if(!date)return;const lb=sharedTravel.length?sharedTravel[sharedTravel.length-1].balance:0;
-  sharedTravel.push({id:Date.now(),date,inp,out,detail,balance:lb+inp-out});
+  sharedTravel.push({id:Date.now(),date,inp,out,detail,balance:lb+inp-out,formulaIn:_rawIn.startsWith('=')?_rawIn:'',formulaOut:_rawOut.startsWith('=')?_rawOut:''});
   $('tv-date').value='';$('tv-in').value='';$('tv-out').value='';$('tv-detail').value='';
   toggleForm('travel');render();
   await syncTravelToSheet();
