@@ -387,16 +387,22 @@ closeModal('planAddModal');render();toast('항목 추가됨');};
 $('btnClosePlanAdd').onclick=()=>closeModal('planAddModal');
 
 // ★ FIX 4: 메모 시트 저장 연동 추가
-function renderMemos(){$('memoList').innerHTML=(D.memos||[]).map((m,i)=>`<div class="mi-item" onclick="editMemo(${i})"><div class="text">${m}</div></div>`).join('');}
+function renderMemos(){$('memoList').innerHTML=(D.memos||[]).map((m,i)=>`<div class="mi-item" style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div class="text" style="flex:1;cursor:pointer" onclick="editMemo(${i})">${m}</div><button onclick="deleteMemo(${i})" style="border:none;background:none;color:var(--t5);cursor:pointer;font-size:16px;padding:0 2px;flex-shrink:0">✕</button></div>`).join('');}
 function addMemo(){editMemoIdx=-1;$('memoInput').value='';$('memoForm').style.display='block';$('memoInput').focus();}
 function editMemo(i){editMemoIdx=i;$('memoInput').value=D.memos[i];$('memoForm').style.display='block';$('memoInput').focus();}
 function cancelMemo(){$('memoForm').style.display='none';editMemoIdx=-1;}
+async function deleteMemo(i){
+  if(!confirm('메모를 삭제할까요?'))return;
+  D.memos.splice(i,1);
+  renderMemos();
+  await gasPost({action:'writeMemos',month:curMonth,memos:D.memos});
+  toast('메모 삭제됨');
+}
 async function saveMemo(){
   const v=$('memoInput').value.trim();if(!v)return;
   if(!D.memos)D.memos=[];
   if(editMemoIdx>=0)D.memos[editMemoIdx]=v;else D.memos.push(v);
   cancelMemo();renderMemos();
-  // ★ GAS에도 저장
   await gasPost({action:'writeMemos',month:curMonth,memos:D.memos});
   toast('메모 저장됨');
 }
