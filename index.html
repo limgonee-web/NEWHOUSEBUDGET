@@ -83,6 +83,13 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 .pr.tot .l{color:var(--t1)}.pr.tot .rv{color:var(--accent)}
 .pr.noclick{cursor:default}.pr.noclick:hover{background:transparent}
 .er{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:14px;cursor:pointer;border-radius:4px}.er:hover{background:#f9fafb}
+
+/* ★ 여행저금통 월별 탭 */
+.tv-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px}
+.tv-tab{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:#fff;color:var(--t4);cursor:pointer;font-size:13px;font-weight:500}
+.tv-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tv-tab.all{border-style:dashed}
+
 .modal-bg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);z-index:100;align-items:center;justify-content:center}
 .modal-bg.show{display:flex}
 .modal{background:#fff;border-radius:18px;padding:24px;width:90%;max-width:500px;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
@@ -115,7 +122,15 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 <div class="tc" id="tab-household"><div class="sh"><div><h2>🏠 공동 가계부</h2><div class="bal-label" id="hhMainBal"></div></div><button class="ab" id="btnToggleHH">+ 추가</button></div><div id="catbar-household" class="cat-bar" style="display:none"></div><div class="fp" id="form-household"><div class="fg"><div><label>날짜</label><input type="date" id="hh-date" class="fi"></div><div><label>항목</label><select id="hh-cat" class="fi"><option value="" disabled selected>선택</option><option>입금</option><option>고정비</option><option>식비</option><option>생필품비</option><option>고양이비</option><option>가족비</option><option>경조사비</option><option>여행저금통</option></select></div><div><label>상세</label><input id="hh-detail" class="fi" placeholder="내용"></div><div><label>금액</label><input id="hh-amount" class="fi" placeholder="0 또는 =수식"></div><div><label>비고</label><input id="hh-note" class="fi" placeholder="메모"></div></div><div class="fa"><button class="bc-btn" id="btnCancelHH">취소</button><button class="bs" id="btnAddHH">추가</button></div></div><div class="pn" style="padding:14px"><div class="tw"><table><colgroup><col class="cd"><col class="cc"><col class="cdt"><col class="ca"><col class="cb"><col class="cn"></colgroup><thead><tr><th>날짜</th><th>항목</th><th>상세</th><th>금액</th><th>잔액</th><th>비고</th></tr></thead><tbody id="tbody-household"></tbody></table></div></div></div>
 <div class="tc" id="tab-goeun"><div class="sh"><div><h2>🧶 고은 용돈</h2><div class="bal-label" id="goeunBal" style="color:var(--pink)"></div></div><button class="ab" id="btnToggleGE">+ 추가</button></div><div id="catbar-goeun" class="cat-bar" style="display:none"></div><div class="fp" id="form-goeun"><div class="fg"><div><label>날짜</label><input type="date" id="ge-date" class="fi"></div><div><label>항목</label><select id="ge-cat" class="fi"><option value="" disabled selected>선택</option><option>입금</option><option>식비</option><option>미용</option><option>취미</option><option>관계</option><option>교통</option><option>병원</option><option>구독</option><option>생필품비</option><option>기타</option></select></div><div><label>상세</label><input id="ge-detail" class="fi" placeholder="내용"></div><div><label>금액</label><input id="ge-amount" class="fi" placeholder="0 또는 =수식"></div><div><label>비고</label><input id="ge-note" class="fi" placeholder="메모"></div></div><div class="fa"><button class="bc-btn" id="btnCancelGE">취소</button><button class="bs" id="btnAddGE">추가</button></div></div><div class="pn" style="padding:14px"><div class="tw"><table><colgroup><col class="cd"><col class="cc"><col class="cdt"><col class="ca"><col class="cb"><col class="cn"></colgroup><thead><tr><th>날짜</th><th>항목</th><th>상세</th><th>금액</th><th>잔액</th><th>비고</th></tr></thead><tbody id="tbody-goeun"></tbody></table></div></div><div id="extra-goeun"></div></div>
 <div class="tc" id="tab-hyunghwan"><div class="sh"><div><h2>🎮 형환 용돈</h2><div class="bal-label" id="hwBal" style="color:var(--blue)"></div></div><button class="ab" id="btnToggleHW">+ 추가</button></div><div id="catbar-hyunghwan" class="cat-bar" style="display:none"></div><div class="fp" id="form-hyunghwan"><div class="fg"><div><label>날짜</label><input type="date" id="hw-date" class="fi"></div><div><label>항목</label><select id="hw-cat" class="fi"><option value="" disabled selected>선택</option><option>입금</option><option>식비</option><option>미용</option><option>취미</option><option>관계</option><option>교통</option><option>선물</option><option>구독</option><option>컨텐츠</option><option>사무용품</option><option>생활용품</option><option>기타</option></select></div><div><label>상세</label><input id="hw-detail" class="fi" placeholder="내용"></div><div><label>금액</label><input id="hw-amount" class="fi" placeholder="0 또는 =수식"></div><div><label>비고</label><input id="hw-note" class="fi" placeholder="메모"></div></div><div class="fa"><button class="bc-btn" id="btnCancelHW">취소</button><button class="bs" id="btnAddHW">추가</button></div></div><div class="pn" style="padding:14px"><div class="tw"><table><colgroup><col class="cd"><col class="cc"><col class="cdt"><col class="ca"><col class="cb"><col class="cn"></colgroup><thead><tr><th>날짜</th><th>항목</th><th>상세</th><th>금액</th><th>잔액</th><th>비고</th></tr></thead><tbody id="tbody-hyunghwan"></tbody></table></div></div><div id="extra-hyunghwan"></div></div>
-<div class="tc" id="tab-travel"><div class="sh"><h2>✈️ 여행저금통</h2><button class="ab" id="btnToggleTV">+ 추가</button></div><div class="fp" id="form-travel"><div class="fg"><div><label>날짜</label><input type="date" id="tv-date" class="fi"></div><div><label>입금</label><input id="tv-in" class="fi" placeholder="0 또는 =수식"></div><div><label>출금</label><input id="tv-out" class="fi" placeholder="0 또는 =수식"></div><div><label>상세</label><input id="tv-detail" class="fi" placeholder="내용"></div></div><div class="fa"><button class="bc-btn" id="btnCancelTV">취소</button><button class="bs" id="btnAddTV">추가</button></div></div><div class="cards" style="margin-bottom:16px"><div class="sc" style="cursor:default"><div class="icon">✈️</div><div class="lb">잔액</div><div class="vl" style="color:var(--green)" id="travelBal">₩0</div></div><div class="sc" style="cursor:default"><div class="icon">💰</div><div class="lb">총 입금</div><div class="vl" style="color:var(--accent)" id="travelIn">₩0</div></div><div class="sc" style="cursor:default"><div class="icon">💸</div><div class="lb">총 출금</div><div class="vl" style="color:var(--red)" id="travelOut">₩0</div></div></div><div class="pn" style="padding:14px"><div class="tw"><table style="table-layout:fixed"><colgroup><col style="width:100px"><col style="width:90px"><col style="width:90px"><col style="width:130px"><col style="width:100px"></colgroup><thead><tr><th>날짜</th><th>입금</th><th>출금</th><th>상세</th><th>잔액</th></tr></thead><tbody id="tbody-travel"></tbody></table></div></div></div>
+
+<!-- ★ 개선: 여행저금통 월별 필터 추가 -->
+<div class="tc" id="tab-travel">
+<div class="sh"><h2>✈️ 여행저금통</h2><button class="ab" id="btnToggleTV">+ 추가</button></div>
+<div class="fp" id="form-travel"><div class="fg"><div><label>날짜</label><input type="date" id="tv-date" class="fi"></div><div><label>입금</label><input id="tv-in" class="fi" placeholder="0 또는 =수식"></div><div><label>출금</label><input id="tv-out" class="fi" placeholder="0 또는 =수식"></div><div><label>상세</label><input id="tv-detail" class="fi" placeholder="내용"></div></div><div class="fa"><button class="bc-btn" id="btnCancelTV">취소</button><button class="bs" id="btnAddTV">추가</button></div></div>
+<div class="cards" style="margin-bottom:16px"><div class="sc" style="cursor:default"><div class="icon">✈️</div><div class="lb">잔액</div><div class="vl" style="color:var(--green)" id="travelBal">₩0</div></div><div class="sc" style="cursor:default"><div class="icon">💰</div><div class="lb">총 입금</div><div class="vl" style="color:var(--accent)" id="travelIn">₩0</div></div><div class="sc" style="cursor:default"><div class="icon">💸</div><div class="lb">총 출금</div><div class="vl" style="color:var(--red)" id="travelOut">₩0</div></div></div>
+<div class="tv-tabs" id="travelTabs"></div>
+<div class="pn" style="padding:14px"><div class="tw"><table style="table-layout:fixed"><colgroup><col style="width:100px"><col style="width:90px"><col style="width:90px"><col style="width:130px"><col style="width:100px"></colgroup><thead><tr><th>날짜</th><th>입금</th><th>출금</th><th>상세</th><th>잔액</th></tr></thead><tbody id="tbody-travel"></tbody></table></div></div></div>
+
 <div class="tc" id="tab-assets"><div class="sh"><h2>💎 자금 현황</h2><button class="ab" id="btnAddAsset">+ 추가</button></div><div id="assetsList"></div></div>
 <div class="tc" id="tab-plan"><div class="sh"><h2>📋 총괄 계획</h2><button class="ab" id="btnAddPlan">+ 추가</button></div><div class="pg" id="planGrid"></div></div>
 </div>
@@ -130,7 +145,10 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 
 <script>
 const GAS="https://script.google.com/macros/s/AKfycbwbFH8X33jqgBMek80xNDd3ZarsbP82OS0A-mYDaLB-fhJ7MGpva5JSAhb5O-iPvHVo/exec";
-const CC={"입금":"#059669","고정비":"#6366f1","식비":"#d97706","생필품비":"#ec4899","고양이비":"#8b5cf6","가족비":"#dc2626","경조사비":"#dc2626","입금":"#059669","미용":"#ec4899","취미":"#3b82f6","관계":"#14b8a6","교통":"#a855f7","기타":"#9ca3af","병원":"#06b6d4","구독":"#8b5cf6","여행저금통":"#d97706","선물":"#ec4899","컨텐츠":"#3b82f6","사무용품":"#9ca3af","생활용품":"#ec4899"};
+
+// ★ FIX 1: CC 객체 중복 키(입금) 제거 - 입금은 색상 구분 없이 green으로 통일
+const CC={"입금":"#059669","수입":"#059669","이월":"#6366f1","고정비":"#6366f1","식비":"#d97706","생필품비":"#ec4899","고양이비":"#8b5cf6","가족비":"#dc2626","경조사비":"#dc2626","미용":"#ec4899","취미":"#3b82f6","관계":"#14b8a6","교통":"#a855f7","기타":"#9ca3af","병원":"#06b6d4","구독":"#8b5cf6","여행저금통":"#d97706","선물":"#ec4899","컨텐츠":"#3b82f6","사무용품":"#9ca3af","생활용품":"#ec4899"};
+
 const fmt=n=>(n==null||isNaN(n))?"0":Math.abs(n).toLocaleString("ko-KR");
 const signed=n=>{if(n==null||isNaN(n)||n===0)return'₩0';return(n<0?'-':'')+'₩'+fmt(n);};
 const N=n=>Number(n)||0;
@@ -169,10 +187,20 @@ async function syncToSheet(key){
   if(r?.success)toast('✓ 시트 저장 완료 ('+r.count+'건)');
 }
 
-let nid={household:500,goeun:500,hyunghwan:500};
+// ★ FIX 2: nid를 로드된 데이터의 max id + 1로 초기화하는 함수
+function resetNid(key, data){
+  const maxId = data.reduce((m, r) => Math.max(m, r.id||0), 0);
+  nid[key] = maxId + 1;
+}
+
+let nid={household:1,goeun:1,hyunghwan:1};
 const ALL_DATA={};let curMonth="2026-02",D=null;
 const catFilters={household:null,goeun:null,hyunghwan:null};
 const sharedTravel=[],sharedAssets=[];
+
+// ★ 여행저금통 월별 필터 상태
+let travelMonthFilter = 'all';
+
 const sharedPlan={income:[{id:1,item:"형환 월급(성과급 포함x)",amount:3200000,note:""},{id:2,item:"고니 월급",amount:3710000,note:""}],fixed:[{id:1,cat:"집",who:"공동",item:"전세금 이자",amount:828082,note:""},{id:2,cat:"집",who:"공동",item:"관리비",amount:180000,note:""},{id:3,cat:"집",who:"공동",item:"가스비",amount:150000,note:"겨울 18만, 여름 9만"},{id:4,cat:"집",who:"공동",item:"인터넷",amount:29700,note:""},{id:5,cat:"보험",who:"화니",item:"자동차",amount:70833,note:""},{id:6,cat:"보험",who:"화니",item:"연금보험",amount:20000,note:""},{id:7,cat:"보험",who:"화니",item:"실비(교보)",amount:9590,note:""},{id:8,cat:"보험",who:"화니",item:"운전자보험",amount:29850,note:""},{id:9,cat:"보험",who:"고니",item:"실비(공제회)",amount:113360,note:""},{id:10,cat:"통신비",who:"화니",item:"핸드폰",amount:24900,note:""},{id:11,cat:"통신비",who:"고니",item:"핸드폰",amount:17000,note:""},{id:12,cat:"교통",who:"화니",item:"자동차 할부",amount:333333,note:"잔여 5회"},{id:13,cat:"교통",who:"화니",item:"전기차 충전",amount:100000,note:""},{id:14,cat:"교통",who:"화니",item:"셔틀버스",amount:13000,note:""},{id:15,cat:"교통",who:"고니",item:"K패스",amount:30000,note:""},{id:16,cat:"구독",who:"공동",item:"넷플릭스",amount:18500,note:""},{id:17,cat:"구독",who:"공동",item:"네이버",amount:4900,note:""},{id:18,cat:"구독",who:"고니",item:"삼케플",amount:7900,note:""},{id:19,cat:"구독",who:"화니",item:"삼케플",amount:7900,note:""}],living:[{id:1,item:"식비",amount:600000,note:""},{id:2,item:"생필품비",amount:100000,note:""},{id:3,item:"고양이비",amount:100000,note:""},{id:4,item:"경조사비",amount:400000,note:""}],allowance:[{id:1,item:"화니 용돈",amount:400000,note:""},{id:2,item:"고니 용돈",amount:400000,note:""}]};
 let extraEditCtx=null,planEditCtx=null,editMemoIdx=-1,editCtx=null,plNid=100,travelEditIdx=-1;
 
@@ -264,11 +292,43 @@ function openExtraAdd(dk){extraEditCtx={dk,i:-1};$('extraModalTitle').textConten
 function openExtraEdit(dk,i){const it=D[dk][i];if(!it)return;extraEditCtx={dk,i};$('extraModalTitle').textContent='기타 지출 수정';$('extraModalFields').innerHTML=`<div><label>항목</label><input id="ex-item" class="fi" value="${it.item}"></div><div><label>금액</label><input id="ex-amt" class="fi" value="${it.amount}" placeholder="0 또는 =수식"></div>`;$('btnDeleteExtra').style.display='block';$('btnDeleteExtra').onclick=async()=>{D[dk].splice(i,1);closeModal('extraModal');render();const who=dk==='goeunExtra'?'고은':'형환';await gasPost({action:'syncExtra',month:curMonth,who,items:D[dk]});toast('기타지출 삭제 반영됨');};openModal('extraModal');}
 $('btnSaveExtra').onclick=async()=>{if(!extraEditCtx)return;const item=$('ex-item').value.trim(),amount=evalFormula($('ex-amt').value);if(!item)return;const{dk,i}=extraEditCtx;if(i>=0)D[dk][i]={item,amount};else{if(!D[dk])D[dk]=[];D[dk].push({item,amount});}closeModal('extraModal');render();const who=dk==='goeunExtra'?'고은':'형환';await gasPost({action:'syncExtra',month:curMonth,who,items:D[dk]});toast('기타지출 저장됨');extraEditCtx=null;};
 
-function renderTravel(){sharedTravel.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.id||0)-(b.id||0));const d=sharedTravel;let b=0;d.forEach(r=>{b+=r.inp-r.out;r.balance=b;});
-const ti=d.reduce((s,r)=>s+r.inp,0),to=d.reduce((s,r)=>s+r.out,0),bal=d.length?d[d.length-1].balance:0;
-$('travelBal').textContent=signed(bal);$('travelBal').style.color=bal>=0?'var(--green)':'var(--red)';
-$('travelIn').textContent='₩'+fmt(ti);$('travelOut').textContent='₩'+fmt(to);
-$('tbody-travel').innerHTML=d.slice().reverse().map((r,ri)=>{const oi=d.length-1-ri;return`<tr class="dr" onclick="openTravelEdit(${oi})"><td style="color:var(--t4)">${fmtD(r.date)}</td><td class="td-a${r.inp?' inc':''}">${r.inp?'+'+fmt(r.inp):''}</td><td class="td-a" style="color:var(--red)">${r.out?fmt(r.out):''}</td><td>${r.detail}</td><td class="td-b">${signed(r.balance)}</td></tr>`;}).join('');}
+// ★ FIX 6: 여행저금통 월별 뷰 추가
+function getTravelMonths(){
+  const months=new Set();
+  sharedTravel.forEach(r=>{if(r.date)months.add(r.date.slice(0,7));});
+  return [...months].sort().reverse();
+}
+
+function renderTravelTabs(){
+  const months=getTravelMonths();
+  const el=$('travelTabs');
+  el.innerHTML=`<button class="tv-tab all${travelMonthFilter==='all'?' active':''}" onclick="setTravelFilter('all')">전체</button>`+
+    months.map(m=>{const[y,mo]=m.split('-');return`<button class="tv-tab${travelMonthFilter===m?' active':''}" onclick="setTravelFilter('${m}')">${y}년 ${parseInt(mo)}월</button>`;}).join('');
+}
+
+function setTravelFilter(m){travelMonthFilter=m;renderTravel();}
+
+function renderTravel(){
+  sharedTravel.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.id||0)-(b.id||0));
+  const d=sharedTravel;
+  let b=0;
+  d.forEach(r=>{b+=r.inp-r.out;r.balance=b;});
+
+  const ti=d.reduce((s,r)=>s+r.inp,0),to=d.reduce((s,r)=>s+r.out,0),bal=d.length?d[d.length-1].balance:0;
+  $('travelBal').textContent=signed(bal);$('travelBal').style.color=bal>=0?'var(--green)':'var(--red)';
+  $('travelIn').textContent='₩'+fmt(ti);$('travelOut').textContent='₩'+fmt(to);
+
+  renderTravelTabs();
+
+  // 필터 적용
+  let filtered=d.slice();
+  if(travelMonthFilter!=='all') filtered=filtered.filter(r=>r.date&&r.date.startsWith(travelMonthFilter));
+
+  $('tbody-travel').innerHTML=filtered.slice().reverse().map(r=>{
+    const oi=d.indexOf(r);
+    return`<tr class="dr" onclick="openTravelEdit(${oi})"><td style="color:var(--t4)">${fmtD(r.date)}</td><td class="td-a${r.inp?' inc':''}">${r.inp?'+'+fmt(r.inp):''}</td><td class="td-a" style="color:var(--red)">${r.out?fmt(r.out):''}</td><td>${r.detail}</td><td class="td-b">${signed(r.balance)}</td></tr>`;
+  }).join('');
+}
 
 function openTravelEdit(i){
   const r=sharedTravel[i];if(!r)return;travelEditIdx=i;
@@ -326,11 +386,20 @@ else sharedPlan[sec].push({id:plNid++,item,amount,note});
 closeModal('planAddModal');render();toast('항목 추가됨');};
 $('btnClosePlanAdd').onclick=()=>closeModal('planAddModal');
 
+// ★ FIX 4: 메모 시트 저장 연동 추가
 function renderMemos(){$('memoList').innerHTML=(D.memos||[]).map((m,i)=>`<div class="mi-item" onclick="editMemo(${i})"><div class="text">${m}</div></div>`).join('');}
 function addMemo(){editMemoIdx=-1;$('memoInput').value='';$('memoForm').style.display='block';$('memoInput').focus();}
 function editMemo(i){editMemoIdx=i;$('memoInput').value=D.memos[i];$('memoForm').style.display='block';$('memoInput').focus();}
 function cancelMemo(){$('memoForm').style.display='none';editMemoIdx=-1;}
-async function saveMemo(){const v=$('memoInput').value.trim();if(!v)return;if(!D.memos)D.memos=[];if(editMemoIdx>=0)D.memos[editMemoIdx]=v;else D.memos.push(v);cancelMemo();renderMemos();}
+async function saveMemo(){
+  const v=$('memoInput').value.trim();if(!v)return;
+  if(!D.memos)D.memos=[];
+  if(editMemoIdx>=0)D.memos[editMemoIdx]=v;else D.memos.push(v);
+  cancelMemo();renderMemos();
+  // ★ GAS에도 저장
+  await gasPost({action:'writeMemos',month:curMonth,memos:D.memos});
+  toast('메모 저장됨');
+}
 
 function toggleForm(k){$('form-'+k).classList.toggle('show');}
 
@@ -338,7 +407,9 @@ async function addItem(key){
   const p=key==='household'?'hh':key==='goeun'?'ge':'hw';
   const date=$(p+'-date').value,cat=$(p+'-cat').value,detail=$(p+'-detail').value,amount=evalFormula($(p+'-amount').value),note=$(p+'-note').value;
   if(!date||!cat)return;
-  D[key].push({id:nid[key]++,date,category:cat,detail,amount,balance:0,note});
+  // ★ FIX 2: nid를 실시간 max+1로 계산
+  const newId = (D[key].reduce((m,r)=>Math.max(m,r.id||0),0))+1;
+  D[key].push({id:newId,date,category:cat,detail,amount,balance:0,note});
   $(p+'-detail').value='';$(p+'-amount').value='';$(p+'-note').value='';$(p+'-cat').selectedIndex=0;
   toggleForm(key);await syncToSheet(key);
 }
@@ -363,16 +434,19 @@ $('btnCloseEdit').onclick=()=>closeModal('editModal');
 $('btnClosePlan').onclick=()=>closeModal('planModal');$('btnSavePlan').onclick=savePlanItem;
 ['editModal','budgetModal','extraModal','planModal','travelEditModal','assetModal','planAddModal'].forEach(id=>{$(id).onclick=e=>{if(e.target===e.currentTarget)e.target.classList.remove('show');};});
 
+// ★ FIX 3: GAS _readSection 정렬 방향 주석(프론트에서 재정렬하므로 GAS 정렬 불필요 - GAS 측 개선사항)
 function applyAllData(result){
   const months=result.months||[],md=result.monthData||{};
   for(const m of months){const res=md[m];if(!res||res.error)continue;
     if(!ALL_DATA[m])ALL_DATA[m]=emptyMonth();const d=ALL_DATA[m];
-    if(res.household?.length)d.household=res.household.map((r,i)=>({id:i+1,...r}));
-    if(res.goeun?.length)d.goeun=res.goeun.map((r,i)=>({id:i+1,...r}));
-    if(res.hyunghwan?.length)d.hyunghwan=res.hyunghwan.map((r,i)=>({id:i+1,...r}));
+    if(res.household?.length){d.household=res.household.map((r,i)=>({id:i+1,...r}));resetNid('household',d.household);}
+    if(res.goeun?.length){d.goeun=res.goeun.map((r,i)=>({id:i+1,...r}));resetNid('goeun',d.goeun);}
+    if(res.hyunghwan?.length){d.hyunghwan=res.hyunghwan.map((r,i)=>({id:i+1,...r}));resetNid('hyunghwan',d.hyunghwan);}
     if(res.budget?.length)d.budget=res.budget;
     if(res.goeunExtra)d.goeunExtra=res.goeunExtra;
     if(res.hyunghwanExtra)d.hyunghwanExtra=res.hyunghwanExtra;
+    // ★ FIX 4: 메모 로드
+    if(res.memos?.length)d.memos=res.memos;
   }
   if(result.travel?.length){sharedTravel.length=0;result.travel.forEach((r,i)=>sharedTravel.push({id:i+1,...r}));}
   if(result.assets?.length){sharedAssets.length=0;result.assets.forEach((a,i)=>sharedAssets.push({id:i+1,...a}));}
