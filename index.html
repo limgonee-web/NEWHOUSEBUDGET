@@ -92,7 +92,7 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 .tv-tab.all{border-style:dashed}
 .modal-bg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);z-index:100;align-items:center;justify-content:center}
 .modal-bg.show{display:flex}
-.modal{background:#fff;border-radius:18px;padding:24px;width:90%;max-width:500px;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal{background:#fff;border-radius:18px;padding:24px;width:90%;max-width:500px;max-height:80vh;overflow-y:auto;overflow-x:hidden;box-shadow:0 20px 60px rgba(0,0,0,.15);-webkit-border-radius:18px}
 .modal h3{font-size:18px;font-weight:600;margin-bottom:16px}.modal .fg{grid-template-columns:1fr 1fr}
 .asset-summary{background:#f9fafb;border:1px solid var(--border);border-radius:14px;padding:16px}
 .asset-summary .as-title{font-size:13px;color:var(--t4);margin-bottom:10px;font-weight:600}
@@ -147,7 +147,7 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 <div class="toast" id="toast"></div>
 
 <script>
-const GAS="https://script.google.com/macros/s/AKfycbxTiG27_GTLjIspjFS-PcxvZSOl7_Nb4LT5yFCqJFWCEEuqj85UrwKc-nIngkZAXiC-/exec";
+const GAS="https://script.google.com/macros/s/AKfycbwbFH8X33jqgBMek80xNDd3ZarsbP82OS0A-mYDaLB-fhJ7MGpva5JSAhb5O-iPvHVo/exec";
 const JEONSE=350000000; // 전세금 3억5천 고정
 
 const CC={"입금":"#059669","수입":"#059669","이월":"#6366f1","고정비":"#6366f1","식비":"#d97706","생필품비":"#ec4899","고양이비":"#8b5cf6","가족비":"#dc2626","경조사비":"#dc2626","미용":"#ec4899","취미":"#3b82f6","관계":"#14b8a6","교통":"#a855f7","기타":"#9ca3af","병원":"#06b6d4","구독":"#8b5cf6","여행저금통":"#d97706","선물":"#ec4899","컨텐츠":"#3b82f6","사무용품":"#9ca3af","생활용품":"#ec4899"};
@@ -198,7 +198,26 @@ async function syncPlanToSheet(){
 
 function switchTab(n){document.querySelectorAll('.tb').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tc').forEach(x=>x.classList.remove('active'));document.querySelector(`.tb[data-tab="${n}"]`)?.classList.add('active');$('tab-'+n)?.classList.add('active');}
 function emptyMonth(){return{household:[],goeun:[],hyunghwan:[],budget:[],goeunExtra:[],hyunghwanExtra:[],memos:[]};}
-function loadMonth(m){curMonth=m;D=ALL_DATA[m];if(!D){D=emptyMonth();ALL_DATA[m]=D;}render();}
+function loadMonth(m){curMonth=m;D=ALL_DATA[m];if(!D){D=emptyMonth();ALL_DATA[m]=D;}ensureCarryOver(m);render();}
+
+// ★ 전월 잔액 자동 이월: 매월 1일에 전월 마지막일 잔액을 '입금'/'전월 잔액'으로 자동 삽입
+function ensureCarryOver(month){
+  const prev=getPrevMonth(month);
+  const prevD=ALL_DATA[prev];
+  if(!prevD)return; // 전월 데이터 없으면 skip
+  const[y,mo]=month.split('-');
+  const firstDay=month+'-01';
+  ['household','goeun','hyunghwan'].forEach(key=>{
+    // 이미 전월 잔액 항목이 있으면 skip
+    const existing=D[key].find(r=>r.category==='입금'&&r.detail==='전월 잔액');
+    if(existing)return;
+    const prevBal=getBal(prevD[key]);
+    if(prevBal===0)return; // 잔액 0이면 skip
+    const newId=(D[key].reduce((m,r)=>Math.max(m,r.id||0),0))+1;
+    D[key].push({id:newId,date:firstDay,category:'입금',detail:'전월 잔액',amount:prevBal,balance:0,note:'자동이월',formula:''});
+    sortAndRecalc(D[key]);
+  });
+}
 function closeModal(id){$(id).classList.remove('show');}
 function openModal(id){$(id).classList.add('show');}
 
@@ -248,9 +267,11 @@ hh.filter(r=>r.category==='고정비').forEach(r=>{const d=(r.detail||'').trim()
 
 $('budgetGrid').innerHTML=(D.budget||[]).map((b,i)=>{
   const sp=byCat[b.category]||0;const bg=N(b.budget);const p=bg>0?Math.min(sp/bg*100,120):0;const ov=sp>bg;const c=CC[b.category]||'#6366f1';const remain=bg-sp;
+  // 여행저금통 카드는 예산 소진 현황에서 숨김
+  if(b.category==='여행저금통')return'';
   let subsHtml='';
   if(b.category==='고정비'&&b.subItems){
-    subsHtml='<div class="bc-subs">'+FIXED_SUB_ITEMS.map(sub=>{const ba=N(b.subItems[sub]);if(!ba)return'';const sa=fixedSubSpend[sub]||0;return`<div class="bc-sub-row"><span>${sub}</span><span class="sv">${sa?'₩'+fmt(sa)+' / ':''}₩${fmt(ba)}</span></div>`;}).filter(Boolean).join('')+'</div>';
+    subsHtml='<div class="bc-subs">'+FIXED_SUB_ITEMS.map(sub=>{const ba=N(b.subItems[sub]);if(!ba)return'';return`<div class="bc-sub-row"><span>${sub}</span><span class="sv">₩${fmt(ba)}</span></div>`;}).filter(Boolean).join('')+'</div>';
   }
   return`<div class="budget-card" onclick="openBudgetModal(${i})"><div class="bc-header"><span class="bc-cat">${b.category}</span><span class="bc-rate" style="background:${ov?'#fef2f2':'#f0fdf4'};color:${ov?'#dc2626':'#059669'}">${bg>0?p.toFixed(0)+'%':'-'}</span></div><div class="bc-bar"><div class="bc-fill" style="width:${Math.min(p,100)}%;background:${ov?'#dc2626':c}"></div></div><div class="bc-row"><span class="l">예산</span><span class="v">₩${fmt(bg)}</span></div><div class="bc-row"><span class="l">지출</span><span class="v" style="color:${ov?'#dc2626':'inherit'}">₩${fmt(sp)}</span></div><div class="bc-row"><span class="l">잔액</span><span class="v" style="color:${remain<0?'#dc2626':'#3b82f6'}">${signed(remain)}</span></div>${subsHtml}${b.memo?`<div class="bc-memo">${b.memo}</div>`:''}</div>`;
 }).join('');
