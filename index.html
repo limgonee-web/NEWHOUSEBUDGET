@@ -115,7 +115,7 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 <div class="container">
 <div class="tc active" id="tab-overview">
 <div class="cards" id="statCards"></div>
-<div class="pn"><div class="pt">📋 예산 소진 현황</div><div class="budget-grid" id="budgetGrid"></div></div>
+<div class="pn"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="pt" style="margin-bottom:0">📋 예산 소진 현황</div><button class="ab" id="btnSetupBudget" style="display:none;font-size:13px;padding:6px 14px">✏️ 예산 설정</button></div><div id="budgetEmpty" style="display:none;padding:20px 0;text-align:center"><div style="font-size:14px;color:var(--t4);margin-bottom:16px">이번 달 예산이 설정되지 않았어요</div><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="bs" id="btnCopyPrevBudget">📋 직전 월 예산 복사</button><button class="ab" id="btnManualBudget">+ 직접 입력</button></div></div><div class="budget-grid" id="budgetGrid"></div></div>
 <div class="g2"><div class="pn" style="display:flex;flex-direction:column;align-items:center"><div style="font-size:14px;color:var(--t4);margin-bottom:10px;font-weight:500">카테고리별 지출</div><svg id="donutSvg" width="160" height="160"></svg><div class="legend" id="legend"></div></div><div id="assetSummaryArea"></div></div>
 <div class="pn"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-size:15px;color:var(--t3);font-weight:500">📝 메모</div><button class="ab" id="btnAddMemo">+ 추가</button></div><div id="memoList"></div><div id="memoForm" style="display:none;margin-top:8px"><input class="fi" id="memoInput" placeholder="메모..." style="width:100%"><div class="fa"><button class="bc-btn" id="btnCancelMemo">취소</button><button class="bs" id="btnSaveMemo">저장</button></div></div></div>
 </div>
@@ -284,6 +284,9 @@ $('statCards').innerHTML=
 `<div class="sc" onclick="switchTab('hyunghwan')"><div class="icon">🎮</div><div class="lb">형환 잔액</div><div class="vl" style="color:var(--blue)">${signed(hwB)}</div><div class="sb">지출 ₩${fmt(hwS)}</div></div>`+
 `<div class="sc" onclick="switchTab('travel')"><div class="icon">✈️</div><div class="lb">여행저금통</div><div class="vl" style="color:${tvB>=0?'var(--green)':'var(--red)'}">${signed(tvB)}</div></div>`;
 const byCat={};hh.filter(r=>{const c=r.category||'';return c!=='입금'&&c!=='수입'&&c!=='이월';}).forEach(r=>{const amt=Math.abs(N(r.amount));byCat[r.category]=(byCat[r.category]||0)+amt;});
+const hasBudget=(D.budget||[]).length>0;
+$('budgetEmpty').style.display=hasBudget?'none':'block';
+$('btnSetupBudget').style.display=hasBudget?'inline-block':'none';
 $('budgetGrid').innerHTML=(D.budget||[]).map((b,i)=>{const sp=byCat[b.category]||0;const bg=N(b.budget);const p=bg>0?Math.min(sp/bg*100,120):0;const ov=sp>bg;const c=CC[b.category]||'#6366f1';const remain=bg-sp;return`<div class="budget-card" onclick="openBudgetModal(${i})"><div class="bc-header"><span class="bc-cat">${b.category}</span><span class="bc-rate" style="background:${ov?'#fef2f2':'#f0fdf4'};color:${ov?'#dc2626':'#059669'}">${bg>0?p.toFixed(0)+'%':'-'}</span></div><div class="bc-bar"><div class="bc-fill" style="width:${Math.min(p,100)}%;background:${ov?'#dc2626':c}"></div></div><div class="bc-row"><span class="l">예산</span><span class="v">₩${fmt(bg)}</span></div><div class="bc-row"><span class="l">지출</span><span class="v" style="color:${ov?'#dc2626':'inherit'}">₩${fmt(sp)}</span></div><div class="bc-row"><span class="l">잔액</span><span class="v" style="color:${remain<0?'#dc2626':'#3b82f6'}">${signed(remain)}</span></div>${b.memo?`<div class="bc-memo">${b.memo}</div>`:''}</div>`;}).join('');
 const entries=Object.entries(byCat);const total=entries.reduce((s,[,v])=>s+v,0);
 let cum=0;const r=60,cx=80,cy=80;let paths='';
@@ -302,6 +305,83 @@ else{const mo=parseInt(curMonth.split('-')[1]),pmo=parseInt(pm.split('-')[1]);el
 function openBudgetModal(i){const b=D.budget[i];$('budgetModalFields').innerHTML=`<div style="margin-bottom:16px"><div style="font-size:15px;font-weight:600;margin-bottom:10px">${b.category}</div><div class="fg" style="grid-template-columns:1fr"><div><label>예산</label><input id="bdg-val" class="fi" value="${b.formula||b.budget}" placeholder="0 또는 =수식"></div><div><label>메모</label><input id="bdg-memo" class="fi" value="${b.memo||''}"></div></div></div>`;
 $('btnSaveBudget').onclick=async()=>{const raw=$('bdg-val').value.trim();b.budget=evalFormula(raw);b.formula=raw.startsWith('=')?raw:'';b.memo=$('bdg-memo').value.trim();closeModal('budgetModal');render();await gasPost({action:'writeBudget',month:curMonth,budgets:D.budget});toast('예산 저장됨');};
 openModal('budgetModal');}
+
+// ★ 예산 설정 함수들
+const DEFAULT_BUDGET_CATS=['고정비','식비','생필품비','고양이비','가족비','경조사비','여행저금통'];
+
+function getPrevMonth(m){
+  const[y,mo]=m.split('-').map(Number);
+  return mo===1?`${y-1}-12`:`${y}-${String(mo-1).padStart(2,'0')}`;
+}
+
+// 직전 월 예산 복사
+async function copyPrevBudget(){
+  const prev=getPrevMonth(curMonth);
+  const prevD=ALL_DATA[prev];
+  if(!prevD||!prevD.budget||!prevD.budget.length){
+    toast('직전 월 예산 데이터가 없어요. 직접 입력해 주세요.','err');
+    openManualBudget();return;
+  }
+  D.budget=prevD.budget.map(b=>({...b}));
+  render();
+  await gasPost({action:'writeBudget',month:curMonth,budgets:D.budget});
+  toast('✓ 직전 월 예산을 복사했어요');
+}
+
+// 직접 입력 모달
+function openManualBudget(){
+  const prev=getPrevMonth(curMonth);
+  const prevD=ALL_DATA[prev];
+  const prevMap={};
+  (prevD?.budget||[]).forEach(b=>prevMap[b.category]=b.budget);
+
+  $('budgetModalFields').innerHTML=`
+    <div style="font-size:13px;color:var(--t5);margin-bottom:14px">카테고리별 예산을 입력해 주세요 (비워두면 제외)</div>
+    ${DEFAULT_BUDGET_CATS.map(cat=>`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span style="width:90px;font-size:14px;font-weight:500;color:var(--t3);flex-shrink:0">${cat}</span>
+        <input id="mbudget-${cat}" class="fi" style="flex:1" placeholder="0 또는 =수식"
+          value="${prevMap[cat]||''}" >
+      </div>`).join('')}`;
+
+  $('btnSaveBudget').onclick=async()=>{
+    const budgets=DEFAULT_BUDGET_CATS
+      .map(cat=>({category:cat,budget:evalFormula($(`mbudget-${cat}`)?.value||'0')}))
+      .filter(b=>b.budget>0);
+    if(!budgets.length){toast('최소 하나 이상 입력해 주세요','err');return;}
+    D.budget=budgets;
+    closeModal('budgetModal');
+    render();
+    await gasPost({action:'writeBudget',month:curMonth,budgets:D.budget});
+    toast('✓ 예산 저장 완료');
+  };
+  openModal('budgetModal');
+}
+
+// 예산 수정 모달 (기존 openBudgetModal은 카드 클릭 시 단일 편집용으로 유지)
+function openBudgetSetupEdit(){
+  const byCat={};(D.budget||[]).forEach(b=>byCat[b.category]=b);
+  $('budgetModalFields').innerHTML=`
+    <div style="font-size:13px;color:var(--t5);margin-bottom:14px">예산을 수정해 주세요</div>
+    ${DEFAULT_BUDGET_CATS.map(cat=>{const b=byCat[cat];return`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span style="width:90px;font-size:14px;font-weight:500;color:var(--t3);flex-shrink:0">${cat}</span>
+        <input id="mbudget-${cat}" class="fi" style="flex:1" placeholder="0 또는 =수식"
+          value="${b?b.budget:''}" >
+      </div>`;}).join('')}`;
+
+  $('btnSaveBudget').onclick=async()=>{
+    const budgets=DEFAULT_BUDGET_CATS
+      .map(cat=>({category:cat,budget:evalFormula($(`mbudget-${cat}`)?.value||'0')}))
+      .filter(b=>b.budget>0);
+    D.budget=budgets;
+    closeModal('budgetModal');
+    render();
+    await gasPost({action:'writeBudget',month:curMonth,budgets:D.budget});
+    toast('✓ 예산 저장 완료');
+  };
+  openModal('budgetModal');
+}
 
 function renderTable(key,data){$('tbody-'+key).innerHTML=data.map(r=>{const c=CC[r.category]||'#6b7280';const cat=r.category||'';const inc=cat==='입금'||cat==='수입'||cat==='이월';return`<tr class="dr" onclick="openEditModal('${key}',${r.id})"><td style="color:var(--t4)">${fmtD(r.date)}</td><td><span class="ct" style="background:${c}15;color:${c}">${cat}</span></td><td style="color:var(--t2)">${r.detail}</td><td class="td-a${inc?' inc':''}">${inc?'+':''}${fmt(Math.abs(r.amount))}</td><td class="td-b">${signed(r.balance)}</td><td class="td-n">${r.note||''}</td></tr>`;}).join('');}
 
@@ -459,7 +539,10 @@ async function addTravel(){
   await syncTravelToSheet();
 }
 
-$('btnAddMemo').onclick=addMemo;$('btnCancelMemo').onclick=cancelMemo;$('btnSaveMemo').onclick=saveMemo;$('memoInput').onkeydown=e=>{if(e.key==='Enter')saveMemo();};
+$('btnAddMemo').onclick=addMemo;
+$('btnCopyPrevBudget').onclick=copyPrevBudget;
+$('btnManualBudget').onclick=openManualBudget;
+$('btnSetupBudget').onclick=openBudgetSetupEdit;$('btnCancelMemo').onclick=cancelMemo;$('btnSaveMemo').onclick=saveMemo;$('memoInput').onkeydown=e=>{if(e.key==='Enter')saveMemo();};
 $('btnToggleHH').onclick=()=>toggleForm('household');$('btnCancelHH').onclick=()=>toggleForm('household');$('btnAddHH').onclick=()=>addItem('household');
 $('btnToggleGE').onclick=()=>toggleForm('goeun');$('btnCancelGE').onclick=()=>toggleForm('goeun');$('btnAddGE').onclick=()=>addItem('goeun');
 $('btnToggleHW').onclick=()=>toggleForm('hyunghwan');$('btnCancelHW').onclick=()=>toggleForm('hyunghwan');$('btnAddHW').onclick=()=>addItem('hyunghwan');
