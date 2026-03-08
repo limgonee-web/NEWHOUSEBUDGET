@@ -54,7 +54,6 @@ col.cd{width:85px}col.cc{width:80px}col.cdt{width:130px}col.ca{width:90px}col.cb
 tr.dr{border-bottom:1px solid #f3f4f6;cursor:pointer;transition:background .15s}tr.dr:hover{background:#f5f3ff}
 .ct{display:inline-block;padding:3px 10px;border-radius:16px;font-size:12px;font-weight:600}
 .td-a{font-weight:600;color:var(--t1)}.td-a.inc{color:var(--green)}.td-b{color:var(--t4)}.td-n{color:var(--t5);font-size:13px}
-/* ★ 인라인 폼 제거, 모달로 대체 */
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:600px){.fg{grid-template-columns:1fr}}
 .fg label{font-size:12px;color:var(--t4);margin-bottom:3px;display:block;font-weight:500}
@@ -91,7 +90,6 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 .tv-tab{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:#fff;color:var(--t4);cursor:pointer;font-size:13px;font-weight:500}
 .tv-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .tv-tab.all{border-style:dashed}
-/* ★ 모달 - 모바일 하단 시트 스타일 */
 .modal-bg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);z-index:100;align-items:flex-end;justify-content:center}
 .modal-bg.show{display:flex}
 .modal-bg .modal{background:#fff;padding:16px 16px 24px;width:100%;max-width:500px;max-height:85vh;overflow:hidden auto;box-shadow:0 -4px 30px rgba(0,0,0,.15);border-radius:18px 18px 0 0;animation:slideUp .25s ease-out}
@@ -116,7 +114,6 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 .toast.show{transform:translateY(0);opacity:1}.toast.ok{background:#f0fdf4;color:#059669;border:1px solid #bbf7d0}.toast.err{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}.toast.info{background:#eff6ff;color:#3b82f6;border:1px solid #bfdbfe}
 .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;height:20px;margin:8px 0}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-/* ★ 모달 드래그 핸들 */
 .modal-handle{width:36px;height:4px;background:#d1d5db;border-radius:2px;margin:0 auto 16px}
 </style>
 </head>
@@ -134,7 +131,6 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 <div class="g2"><div class="pn" style="display:flex;flex-direction:column;align-items:center"><div style="font-size:14px;color:var(--t4);margin-bottom:10px;font-weight:500">카테고리별 지출</div><svg id="donutSvg" width="160" height="160"></svg><div class="legend" id="legend"></div></div><div id="assetSummaryArea"></div></div>
 <div class="pn"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-size:15px;color:var(--t3);font-weight:500">📝 메모</div><button class="ab" id="btnAddMemo">+ 추가</button></div><div id="memoList"></div><div id="memoForm" style="display:none;margin-top:8px"><input class="fi" id="memoInput" placeholder="메모..." style="width:100%"><div class="fa"><button class="bc-btn" id="btnCancelMemo">취소</button><button class="bs" id="btnSaveMemo">저장</button></div></div></div>
 </div>
-<!-- ★ 인라인 폼 제거, 테이블만 남김 -->
 <div class="tc" id="tab-household"><div class="sh"><div><h2>🏠 공동 가계부</h2><div class="bal-label" id="hhMainBal"></div></div><button class="ab" id="btnToggleHH">+ 추가</button></div><div id="catbar-household" class="cat-bar" style="display:none"></div><div class="pn" style="padding:14px"><div class="tw"><table><colgroup><col class="cd"><col class="cc"><col class="cdt"><col class="ca"><col class="cb"><col class="cn"></colgroup><thead><tr><th>날짜</th><th>항목</th><th>상세</th><th>금액</th><th>잔액</th><th>비고</th></tr></thead><tbody id="tbody-household"></tbody></table></div></div></div>
 <div class="tc" id="tab-goeun"><div class="sh"><div><h2>🧶 고은 용돈</h2><div class="bal-label" id="goeunBal" style="color:var(--pink)"></div></div><button class="ab" id="btnToggleGE">+ 추가</button></div><div id="catbar-goeun" class="cat-bar" style="display:none"></div><div class="pn" style="padding:14px"><div class="tw"><table><colgroup><col class="cd"><col class="cc"><col class="cdt"><col class="ca"><col class="cb"><col class="cn"></colgroup><thead><tr><th>날짜</th><th>항목</th><th>상세</th><th>금액</th><th>잔액</th><th>비고</th></tr></thead><tbody id="tbody-goeun"></tbody></table></div></div><div id="extra-goeun"></div></div>
 <div class="tc" id="tab-hyunghwan"><div class="sh"><div><h2>🎮 형환 용돈</h2><div class="bal-label" id="hwBal" style="color:var(--blue)"></div></div><button class="ab" id="btnToggleHW">+ 추가</button></div><div id="catbar-hyunghwan" class="cat-bar" style="display:none"></div><div class="pn" style="padding:14px"><div class="tw"><table><colgroup><col class="cd"><col class="cc"><col class="cdt"><col class="ca"><col class="cb"><col class="cn"></colgroup><thead><tr><th>날짜</th><th>항목</th><th>상세</th><th>금액</th><th>잔액</th><th>비고</th></tr></thead><tbody id="tbody-hyunghwan"></tbody></table></div></div><div id="extra-hyunghwan"></div></div>
@@ -147,7 +143,7 @@ input[type="number"].fi::-webkit-inner-spin-button{-webkit-appearance:none}input
 <div class="tc" id="tab-plan"><div class="sh"><h2>📋 총괄 계획</h2><button class="ab" id="btnAddPlan">+ 추가</button></div><div class="pg" id="planGrid"></div></div>
 </div>
 
-<!-- ★ 추가 모달 (가계부/고은/형환/여행 공용) -->
+<!-- 추가 모달 -->
 <div class="modal-bg" id="addItemModal"><div class="modal"><div class="modal-handle"></div><h3 id="addItemTitle">항목 추가</h3><div class="fg" id="addItemFields"></div><div class="fa" style="margin-top:16px"><button class="bc-btn" id="btnCancelAdd">취소</button><button class="bs" id="btnSaveAdd">추가</button></div></div></div>
 
 <!-- Modals -->
@@ -184,8 +180,35 @@ function customConfirm(msg,title='확인'){return new Promise(resolve=>{$('confi
 function getPrevMonth(m){const[y,mo]=m.split('-').map(Number);return mo===1?`${y-1}-12`:`${y}-${String(mo-1).padStart(2,'0')}`;}
 async function gasPost(body){if(!GAS||GAS.includes('여기에'))return null;setBadge('busy');try{const r=await fetch(GAS,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(body)});const j=await r.json();if(j.error){toast('시트 오류: '+j.error,'err');setBadge('err');return null;}setBadge('ok');return j;}catch(e){toast('연결 오류','err');setBadge('err');return null;}}
 const SHEET_NAME={household:'가계부',goeun:'고은',hyunghwan:'형환'};
-function sortAndRecalc(arr){arr.sort((a,b)=>{if(a.date<b.date)return-1;if(a.date>b.date)return 1;const ai=isIncome(a.category)?0:1,bi=isIncome(b.category)?0:1;if(ai!==bi)return ai-bi;return(a.id||0)-(b.id||0);});let bal=0;for(let i=0;i<arr.length;i++){const cat=arr[i].category||'';const amt=Math.abs(N(arr[i].amount));if(isIncome(cat))bal+=amt;else bal-=amt;arr[i].balance=bal;}}
-async function syncToSheet(key){sortAndRecalc(D[key]);render();const rows=D[key].map(r=>({date:r.date,category:r.category,detail:r.detail,amount:r.amount,balance:r.balance,note:r.note||''}));toast('시트 동기화 중...','info');const r=await gasPost({action:'syncSection',sheet:SHEET_NAME[key],month:curMonth,rows});if(r?.success)toast('✓ 시트 저장 완료 ('+r.count+'건)');}
+
+function sortAndRecalc(arr){
+  arr.sort((a,b)=>{
+    if(a.date<b.date)return-1;
+    if(a.date>b.date)return 1;
+    const ai=isIncome(a.category)?0:1,bi=isIncome(b.category)?0:1;
+    if(ai!==bi)return ai-bi;
+    return(a.id||0)-(b.id||0);
+  });
+  let bal=0;
+  for(let i=0;i<arr.length;i++){
+    const cat=arr[i].category||'';
+    const amt=Math.abs(N(arr[i].amount));
+    if(isIncome(cat))bal+=amt;else bal-=amt;
+    arr[i].balance=bal;
+  }
+}
+
+async function syncToSheet(key){
+  sortAndRecalc(D[key]);
+  render();
+  // ★ 이월 항목(전월 잔액)은 시트에 저장하지 않음 - 시트에서 중복 방지
+  const rows=D[key]
+    .filter(r=>!(r.category==='입금'&&r.detail==='전월 잔액'&&r.note==='자동이월'))
+    .map(r=>({date:r.date,category:r.category,detail:r.detail,amount:r.amount,balance:r.balance,note:r.note||''}));
+  toast('시트 동기화 중...','info');
+  const r=await gasPost({action:'syncSection',sheet:SHEET_NAME[key],month:curMonth,rows});
+  if(r?.success)toast('✓ 시트 저장 완료 ('+r.count+'건)');
+}
 
 const ALL_DATA={};
 let curMonth=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');})();
@@ -195,8 +218,6 @@ const sharedTravel=[],sharedAssets=[];
 let travelMonthFilter='all';
 let sharedPlan={income:[{id:1,item:"형환 월급(성과급 포함x)",amount:3200000,note:""},{id:2,item:"고니 월급",amount:3710000,note:""}],fixed:[{id:1,cat:"집",who:"공동",item:"전세금 이자",amount:828082,note:""},{id:2,cat:"집",who:"공동",item:"관리비",amount:180000,note:""},{id:3,cat:"집",who:"공동",item:"가스비",amount:150000,note:"겨울 18만, 여름 9만"},{id:4,cat:"집",who:"공동",item:"인터넷",amount:29700,note:""},{id:5,cat:"보험",who:"화니",item:"자동차",amount:70833,note:""},{id:6,cat:"보험",who:"화니",item:"연금보험",amount:20000,note:""},{id:7,cat:"보험",who:"화니",item:"실비(교보)",amount:9590,note:""},{id:8,cat:"보험",who:"화니",item:"운전자보험",amount:29850,note:""},{id:9,cat:"보험",who:"고니",item:"실비(공제회)",amount:113360,note:""},{id:10,cat:"통신비",who:"화니",item:"핸드폰",amount:24900,note:""},{id:11,cat:"통신비",who:"고니",item:"핸드폰",amount:17000,note:""},{id:12,cat:"교통",who:"화니",item:"자동차 할부",amount:333333,note:"잔여 5회"},{id:13,cat:"교통",who:"화니",item:"전기차 충전",amount:100000,note:""},{id:14,cat:"교통",who:"화니",item:"셔틀버스",amount:13000,note:""},{id:15,cat:"교통",who:"고니",item:"K패스",amount:30000,note:""},{id:16,cat:"구독",who:"공동",item:"넷플릭스",amount:18500,note:""},{id:17,cat:"구독",who:"공동",item:"네이버",amount:4900,note:""},{id:18,cat:"구독",who:"고니",item:"삼케플",amount:7900,note:""},{id:19,cat:"구독",who:"화니",item:"삼케플",amount:7900,note:""}],living:[{id:1,item:"식비",amount:600000,note:""},{id:2,item:"생필품비",amount:100000,note:""},{id:3,item:"고양이비",amount:100000,note:""},{id:4,item:"경조사비",amount:400000,note:""}],allowance:[{id:1,item:"화니 용돈",amount:400000,note:""},{id:2,item:"고니 용돈",amount:400000,note:""}]};
 let extraEditCtx=null,planEditCtx=null,editMemoIdx=-1,editCtx=null,plNid=100,travelEditIdx=-1;
-
-// ★ 추가 모달 컨텍스트
 let addModalCtx=null;
 
 const CATS_MAP={
@@ -206,7 +227,6 @@ const CATS_MAP={
 };
 const TITLE_MAP={household:'🏠 공동 가계부',goeun:'🧶 고은 용돈',hyunghwan:'🎮 형환 용돈',travel:'✈️ 여행저금통'};
 
-// ★ 추가 모달 열기
 function openAddModal(key){
   addModalCtx={key};
   $('addItemTitle').textContent=TITLE_MAP[key]+' 추가';
@@ -226,11 +246,9 @@ function openAddModal(key){
       <div style="grid-column:1/-1"><label>비고</label><input id="add-note" class="fi" placeholder="메모"></div>`;
   }
   openModal('addItemModal');
-  // 포커스를 살짝 지연시켜 모바일 키보드 이슈 방지
   setTimeout(()=>{const el=key==='travel'?$('add-inp'):$('add-detail');if(el)el.focus();},300);
 }
 
-// ★ 추가 모달 저장
 $('btnSaveAdd').onclick=async()=>{
   if(!addModalCtx)return;
   const key=addModalCtx.key;
@@ -252,8 +270,36 @@ $('btnCancelAdd').onclick=()=>{closeModal('addItemModal');addModalCtx=null;};
 async function syncPlanToSheet(){const r=await gasPost({action:'syncPlan',plan:sharedPlan});if(r?.success)toast('✓ 총괄계획 저장 완료');else if(r?.error?.includes('Unknown action'))toast('GAS를 v6.0으로 업데이트해주세요','err');}
 function switchTab(n){document.querySelectorAll('.tb').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tc').forEach(x=>x.classList.remove('active'));document.querySelector(`.tb[data-tab="${n}"]`)?.classList.add('active');$('tab-'+n)?.classList.add('active');}
 function emptyMonth(){return{household:[],goeun:[],hyunghwan:[],budget:[],goeunExtra:[],hyunghwanExtra:[],memos:[]};}
-function loadMonth(m){curMonth=m;D=ALL_DATA[m];if(!D){D=emptyMonth();ALL_DATA[m]=D;}ensureCarryOver(m);render();}
-function ensureCarryOver(month){const prev=getPrevMonth(month);const prevD=ALL_DATA[prev];if(!prevD)return;const firstDay=month+'-01';['household','goeun','hyunghwan'].forEach(key=>{const existing=D[key].find(r=>r.category==='입금'&&r.detail==='전월 잔액');if(existing)return;const prevBal=getBal(prevD[key]);if(prevBal===0)return;const newId=(D[key].reduce((m,r)=>Math.max(m,r.id||0),0))+1;D[key].push({id:newId,date:firstDay,category:'입금',detail:'전월 잔액',amount:prevBal,balance:0,note:'자동이월',formula:''});sortAndRecalc(D[key]);});}
+
+// ★ 핵심 수정: loadMonth는 단순히 월 전환 + 렌더만 담당
+// ensureCarryOver는 여기서 호출하지 않음
+function loadMonth(m){
+  curMonth=m;
+  D=ALL_DATA[m];
+  if(!D){D=emptyMonth();ALL_DATA[m]=D;}
+  render();
+}
+
+// ★ 핵심 수정: GAS 데이터 로드 완료 후 딱 한 번만 이월 처리
+function ensureCarryOver(month){
+  const prev=getPrevMonth(month);
+  const prevD=ALL_DATA[prev];
+  if(!prevD)return;
+  const firstDay=month+'-01';
+  ['household','goeun','hyunghwan'].forEach(key=>{
+    const d=ALL_DATA[month];
+    if(!d)return;
+    // 이미 이월 항목이 있으면 절대 추가하지 않음
+    const existing=d[key].find(r=>r.category==='입금'&&r.detail==='전월 잔액'&&r.note==='자동이월');
+    if(existing)return;
+    const prevBal=getBal(prevD[key]);
+    if(prevBal===0)return;
+    const newId=(d[key].reduce((mx,r)=>Math.max(mx,r.id||0),0))+1;
+    d[key].push({id:newId,date:firstDay,category:'입금',detail:'전월 잔액',amount:prevBal,balance:0,note:'자동이월',formula:''});
+    sortAndRecalc(d[key]);
+  });
+}
+
 function closeModal(id){$(id).classList.remove('show');}
 function openModal(id){$(id).classList.add('show');}
 
@@ -392,7 +438,6 @@ function cancelMemo(){$('memoForm').style.display='none';editMemoIdx=-1;}
 async function deleteMemo(i){const ok=await customConfirm('메모를 삭제할까요?','삭제');if(!ok)return;D.memos.splice(i,1);renderMemos();await gasPost({action:'writeMemos',month:curMonth,memos:D.memos});toast('메모 삭제됨');}
 async function saveMemo(){const v=$('memoInput').value.trim();if(!v)return;if(!D.memos)D.memos=[];if(editMemoIdx>=0)D.memos[editMemoIdx]=v;else D.memos.push(v);cancelMemo();renderMemos();await gasPost({action:'writeMemos',month:curMonth,memos:D.memos});toast('메모 저장됨');}
 
-// ★ 버튼: 인라인 토글 대신 모달 열기
 $('btnToggleHH').onclick=()=>openAddModal('household');
 $('btnToggleGE').onclick=()=>openAddModal('goeun');
 $('btnToggleHW').onclick=()=>openAddModal('hyunghwan');
@@ -402,26 +447,80 @@ $('btnAddMemo').onclick=addMemo;$('btnCopyPrevBudget').onclick=copyPrevBudget;$(
 $('btnCloseBudget').onclick=()=>closeModal('budgetModal');$('btnCloseExtra').onclick=()=>closeModal('extraModal');$('btnCloseEdit').onclick=()=>closeModal('editModal');$('btnClosePlan').onclick=()=>closeModal('planModal');$('btnSavePlan').onclick=savePlanItem;
 ['addItemModal','editModal','budgetModal','extraModal','planModal','travelEditModal','assetModal','planAddModal','confirmModal'].forEach(id=>{$(id).onclick=e=>{if(e.target===e.currentTarget)e.target.classList.remove('show');};});
 
+// ★ 핵심 수정: GAS 데이터를 ALL_DATA에 채운 뒤 ensureCarryOver를 모든 월에 순서대로 적용
 function applyAllData(result){
   const months=result.months||[],md=result.monthData||{};
-  for(const m of months){const res=md[m];if(!res||res.error)continue;if(!ALL_DATA[m])ALL_DATA[m]=emptyMonth();const d=ALL_DATA[m];if(res.household?.length)d.household=res.household.map((r,i)=>({id:i+1,...r}));if(res.goeun?.length)d.goeun=res.goeun.map((r,i)=>({id:i+1,...r}));if(res.hyunghwan?.length)d.hyunghwan=res.hyunghwan.map((r,i)=>({id:i+1,...r}));if(res.budget?.length)d.budget=res.budget;if(res.goeunExtra)d.goeunExtra=res.goeunExtra;if(res.hyunghwanExtra)d.hyunghwanExtra=res.hyunghwanExtra;if(res.memos?.length)d.memos=res.memos;}
+
+  // 1단계: 모든 월 데이터를 ALL_DATA에 저장 (이월 항목 없이 순수 데이터만)
+  for(const m of months){
+    const res=md[m];
+    if(!res||res.error)continue;
+    if(!ALL_DATA[m])ALL_DATA[m]=emptyMonth();
+    const d=ALL_DATA[m];
+    if(res.household?.length)d.household=res.household.map((r,i)=>({id:i+1,...r}));
+    if(res.goeun?.length)d.goeun=res.goeun.map((r,i)=>({id:i+1,...r}));
+    if(res.hyunghwan?.length)d.hyunghwan=res.hyunghwan.map((r,i)=>({id:i+1,...r}));
+    if(res.budget?.length)d.budget=res.budget;
+    if(res.goeunExtra)d.goeunExtra=res.goeunExtra;
+    if(res.hyunghwanExtra)d.hyunghwanExtra=res.hyunghwanExtra;
+    if(res.memos?.length)d.memos=res.memos;
+  }
+
   if(result.travel?.length){sharedTravel.length=0;result.travel.forEach((r,i)=>sharedTravel.push({id:i+1,...r}));}
   if(result.assets?.length){sharedAssets.length=0;result.assets.forEach((a,i)=>sharedAssets.push({id:i+1,...a}));}
   if(result.plan){try{const p=typeof result.plan==='string'?JSON.parse(result.plan):result.plan;if(p.income)sharedPlan.income=p.income;if(p.fixed)sharedPlan.fixed=p.fixed;if(p.living)sharedPlan.living=p.living;if(p.allowance)sharedPlan.allowance=p.allowance;const allIds=[...sharedPlan.income,...sharedPlan.fixed,...sharedPlan.living,...sharedPlan.allowance].map(x=>x.id||0);plNid=Math.max(...allIds,99)+1;}catch(e){console.warn('plan parse err',e);}}
-  if(months.length){const sel=$('monthPicker');const localMonths=Object.keys(ALL_DATA).filter(m=>!months.includes(m));const allMonths=[...new Set([...months,...localMonths])].sort().reverse();sel.innerHTML='';allMonths.forEach(m=>{const o=document.createElement('option');const[y,mo]=m.split('-');o.value=m;o.textContent=`${y}년 ${parseInt(mo)}월`;sel.appendChild(o);});if(allMonths.includes(curMonth))sel.value=curMonth;else{const todayMonth=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');})();if(allMonths.includes(todayMonth)){curMonth=todayMonth;sel.value=curMonth;}else{curMonth=allMonths[0];sel.value=curMonth;}}}
-  $('loadingSkeleton').style.display='none';loadMonth(curMonth);
+
+  // 2단계: 월을 오름차순으로 정렬한 뒤 순서대로 이월 처리 (이전 달 → 다음 달 순)
+  // 이렇게 해야 이월 잔액이 체인처럼 정확하게 전파됨
+  const sortedMonths=[...months].sort();
+  for(const m of sortedMonths){
+    ensureCarryOver(m);
+  }
+
+  // 3단계: picker 구성
+  if(months.length){
+    const sel=$('monthPicker');
+    const localMonths=Object.keys(ALL_DATA).filter(m=>!months.includes(m));
+    const allMonths=[...new Set([...months,...localMonths])].sort().reverse();
+    sel.innerHTML='';
+    allMonths.forEach(m=>{
+      const o=document.createElement('option');
+      const[y,mo]=m.split('-');
+      o.value=m;o.textContent=`${y}년 ${parseInt(mo)}월`;
+      sel.appendChild(o);
+    });
+    if(allMonths.includes(curMonth))sel.value=curMonth;
+    else{
+      const todayMonth=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');})();
+      if(allMonths.includes(todayMonth)){curMonth=todayMonth;sel.value=curMonth;}
+      else{curMonth=allMonths[0];sel.value=curMonth;}
+    }
+  }
+
+  $('loadingSkeleton').style.display='none';
+  loadMonth(curMonth);
 }
 
+// ★ 핵심 수정: 앱 시작 시 loadMonth 단 한 번만 호출 (스켈레톤 표시용)
+// ensureCarryOver는 applyAllData 안에서만 실행됨
 if(!ALL_DATA[curMonth])ALL_DATA[curMonth]=emptyMonth();
-loadMonth(curMonth);
+D=ALL_DATA[curMonth];
+// 스켈레톤은 loadingSkeleton div가 처리하므로 render만 최소 호출
+render();
 
 (async()=>{
   if(!GAS||GAS.includes('여기에')){setBadge('err');toast('GAS URL을 설정해주세요','err');$('loadingSkeleton').style.display='none';return;}
   setBadge('busy');toast('시트 데이터 로드중...','info');
-  try{const res=await fetch(GAS+'?action=getAllData',{redirect:'follow'});const txt=await res.text();let r;try{r=JSON.parse(txt);}catch{setBadge('err');toast('응답 파싱 오류','err');$('loadingSkeleton').style.display='none';return;}
-  if(r.error){setBadge('err');toast('연결 실패: '+r.error,'err');$('loadingSkeleton').style.display='none';return;}
-  applyAllData(r);setBadge('ok');toast('✓ 시트 로드 완료');}
-  catch(e){setBadge('err');toast('연결 오류: '+e.message,'err');$('loadingSkeleton').style.display='none';}
+  try{
+    const res=await fetch(GAS+'?action=getAllData',{redirect:'follow'});
+    const txt=await res.text();
+    let r;
+    try{r=JSON.parse(txt);}catch{setBadge('err');toast('응답 파싱 오류','err');$('loadingSkeleton').style.display='none';return;}
+    if(r.error){setBadge('err');toast('연결 실패: '+r.error,'err');$('loadingSkeleton').style.display='none';return;}
+    applyAllData(r);
+    setBadge('ok');
+    toast('✓ 시트 로드 완료');
+  }catch(e){setBadge('err');toast('연결 오류: '+e.message,'err');$('loadingSkeleton').style.display='none';}
 })();
 </script>
 </body>
