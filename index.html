@@ -177,10 +177,10 @@ function setBadge(s){const b=$('syncBadge');b.textContent=s==='ok'?'✓ 연결�
 const $=id=>document.getElementById(id);
 function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function customConfirm(msg,title='확인'){return new Promise(resolve=>{$('confirmTitle').textContent=title;$('confirmMsg').textContent=msg;openModal('confirmModal');const yes=()=>{closeModal('confirmModal');cleanup();resolve(true);};const no=()=>{closeModal('confirmModal');cleanup();resolve(false);};const cleanup=()=>{$('btnConfirmYes').onclick=null;$('btnConfirmNo').onclick=null;};$('btnConfirmYes').onclick=yes;$('btnConfirmNo').onclick=no;});}
-function getPrevMonth(m){const[y,mo]=m.split('-').map(Number);return mo===1?`${y-1}-12`:`${y}-${String(mo-1).padStart(2,'0')}`;}
 async function gasPost(body){if(!GAS||GAS.includes('여기에'))return null;setBadge('busy');try{const r=await fetch(GAS,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain'},body:JSON.stringify(body)});const j=await r.json();if(j.error){toast('시트 오류: '+j.error,'err');setBadge('err');return null;}setBadge('ok');return j;}catch(e){toast('연결 오류','err');setBadge('err');return null;}}
 const SHEET_NAME={household:'가계부',goeun:'고은',hyunghwan:'형환'};
 
+// ★ 자동이월 로직 완전 제거 - sortAndRecalc는 순수하게 정렬+잔액계산만 담당
 function sortAndRecalc(arr){
   arr.sort((a,b)=>{
     if(a.date<b.date)return-1;
@@ -201,10 +201,7 @@ function sortAndRecalc(arr){
 async function syncToSheet(key){
   sortAndRecalc(D[key]);
   render();
-  // ★ 이월 항목(전월 잔액)은 시트에 저장하지 않음 - 시트에서 중복 방지
-  const rows=D[key]
-    .filter(r=>!(r.category==='입금'&&r.detail==='전월 잔액'&&r.note==='자동이월'))
-    .map(r=>({date:r.date,category:r.category,detail:r.detail,amount:r.amount,balance:r.balance,note:r.note||''}));
+  const rows=D[key].map(r=>({date:r.date,category:r.category,detail:r.detail,amount:r.amount,balance:r.balance,note:r.note||''}));
   toast('시트 동기화 중...','info');
   const r=await gasPost({action:'syncSection',sheet:SHEET_NAME[key],month:curMonth,rows});
   if(r?.success)toast('✓ 시트 저장 완료 ('+r.count+'건)');
@@ -271,33 +268,11 @@ async function syncPlanToSheet(){const r=await gasPost({action:'syncPlan',plan:s
 function switchTab(n){document.querySelectorAll('.tb').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tc').forEach(x=>x.classList.remove('active'));document.querySelector(`.tb[data-tab="${n}"]`)?.classList.add('active');$('tab-'+n)?.classList.add('active');}
 function emptyMonth(){return{household:[],goeun:[],hyunghwan:[],budget:[],goeunExtra:[],hyunghwanExtra:[],memos:[]};}
 
-// ★ 핵심 수정: loadMonth는 단순히 월 전환 + 렌더만 담당
-// ensureCarryOver는 여기서 호출하지 않음
 function loadMonth(m){
   curMonth=m;
   D=ALL_DATA[m];
   if(!D){D=emptyMonth();ALL_DATA[m]=D;}
   render();
-}
-
-// ★ 핵심 수정: GAS 데이터 로드 완료 후 딱 한 번만 이월 처리
-function ensureCarryOver(month){
-  const prev=getPrevMonth(month);
-  const prevD=ALL_DATA[prev];
-  if(!prevD)return;
-  const firstDay=month+'-01';
-  ['household','goeun','hyunghwan'].forEach(key=>{
-    const d=ALL_DATA[month];
-    if(!d)return;
-    // 이미 이월 항목이 있으면 절대 추가하지 않음
-    const existing=d[key].find(r=>r.category==='입금'&&r.detail==='전월 잔액'&&r.note==='자동이월');
-    if(existing)return;
-    const prevBal=getBal(prevD[key]);
-    if(prevBal===0)return;
-    const newId=(d[key].reduce((mx,r)=>Math.max(mx,r.id||0),0))+1;
-    d[key].push({id:newId,date:firstDay,category:'입금',detail:'전월 잔액',amount:prevBal,balance:0,note:'자동이월',formula:''});
-    sortAndRecalc(d[key]);
-  });
 }
 
 function closeModal(id){$(id).classList.remove('show');}
@@ -380,6 +355,7 @@ function updateFixedSubTotalInSetup(){let total=0;FIXED_SUB_ITEMS.forEach(sub=>{
 function buildBudgetSetupHtml(prevMap,prevSubMap){return`<div style="font-size:13px;color:var(--t5);margin-bottom:14px">카테고리별 예산을 입력해 주세요</div>${DEFAULT_BUDGET_CATS.map(cat=>{if(cat==='고정비'){const prevSubs=prevSubMap['고정비']||{};return`<div style="margin-bottom:14px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:4px"><span style="width:90px;font-size:14px;font-weight:600;color:var(--t2);flex-shrink:0">${cat}</span><span id="mbudget-fixed-auto" style="font-size:14px;font-weight:700;color:var(--accent)">₩0</span><span style="font-size:11px;color:var(--t5)">(하위 합산)</span></div><div style="margin-left:20px;padding:10px;background:#f0f0f8;border-radius:10px"><div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:6px">하위 항목</div>${FIXED_SUB_ITEMS.map(sub=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="width:70px;font-size:12px;color:var(--t4)">${sub}</span><input id="mbudget-sub-${sub.replace(/ /g,'_')}" class="fi" style="flex:1;padding:6px 8px;font-size:13px" value="${prevSubs[sub]||''}" placeholder="0" inputmode="decimal" oninput="updateFixedSubTotalInSetup()"></div>`).join('')}</div></div>`;}return`<div style="margin-bottom:10px"><div style="display:flex;align-items:center;gap:10px"><span style="width:90px;font-size:14px;font-weight:500;color:var(--t3);flex-shrink:0">${cat}</span><input id="mbudget-${cat}" class="fi" style="flex:1" placeholder="0 또는 =수식" value="${prevMap[cat]||''}" inputmode="decimal" oninput="updateBudgetTotal()"></div></div>`;}).join('')}<div style="border-top:2px solid var(--border);margin-top:14px;padding-top:14px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:14px;font-weight:700;color:var(--t1)">총계</span><span id="budgetTotalDisplay" style="font-size:16px;font-weight:700;color:var(--accent)">₩0</span></div><div style="display:flex;justify-content:space-between;align-items:center;background:#f5f3ff;padding:10px 14px;border-radius:10px"><span style="font-size:13px;color:var(--accent);font-weight:600">👤 1인당 (÷2)</span><span id="budgetHalfDisplay" style="font-size:15px;font-weight:700;color:var(--accent)">₩0</span></div></div>`;}
 function saveBudgetFromSetup(){return DEFAULT_BUDGET_CATS.map(cat=>{if(cat==='고정비'){const subItems={};let subTotal=0;FIXED_SUB_ITEMS.forEach(sub=>{const el=document.getElementById('mbudget-sub-'+sub.replace(/ /g,'_'));if(el){const v=evalFormula(el.value);subItems[sub]=v;subTotal+=v;}});return{category:cat,budget:subTotal,subItems};}return{category:cat,budget:evalFormula($(`mbudget-${cat}`)?.value||'0')};}).filter(b=>b.budget>0);}
 async function copyPrevBudget(){const prev=getPrevMonth(curMonth);const prevD=ALL_DATA[prev];if(!prevD||!prevD.budget||!prevD.budget.length){toast('직전 월 예산 데이터가 없어요','err');openManualBudget();return;}D.budget=prevD.budget.map(b=>({...b,subItems:b.subItems?{...b.subItems}:undefined}));render();await gasPost({action:'writeBudget',month:curMonth,budgets:D.budget});toast('✓ 직전 월 예산을 복사했어요');}
+function getPrevMonth(m){const[y,mo]=m.split('-').map(Number);return mo===1?`${y-1}-12`:`${y}-${String(mo-1).padStart(2,'0')}`;}
 function openManualBudget(){const prev=getPrevMonth(curMonth);const prevD=ALL_DATA[prev];const prevMap={};const prevSubMap={};(prevD?.budget||[]).forEach(b=>{prevMap[b.category]=b.budget;if(b.subItems)prevSubMap[b.category]=b.subItems;});$('budgetModalFields').innerHTML=buildBudgetSetupHtml(prevMap,prevSubMap);setTimeout(()=>{updateFixedSubTotalInSetup();updateBudgetTotal();},0);$('btnSaveBudget').onclick=async()=>{const budgets=saveBudgetFromSetup();if(!budgets.length){toast('최소 하나 이상 입력해 주세요','err');return;}D.budget=budgets;closeModal('budgetModal');render();const bSave=D.budget.map(x=>({category:x.category,budget:x.budget,subItems:x.subItems||undefined,memo:x.memo||undefined,formula:x.formula||undefined}));await gasPost({action:'writeBudget',month:curMonth,budgets:bSave});toast('✓ 예산 저장 완료');};openModal('budgetModal');}
 function openBudgetSetupEdit(){const byCat={};(D.budget||[]).forEach(b=>byCat[b.category]=b);const prevMap={};const prevSubMap={};Object.values(byCat).forEach(b=>{prevMap[b.category]=b.formula||b.budget;if(b.subItems)prevSubMap[b.category]=b.subItems;});$('budgetModalFields').innerHTML=buildBudgetSetupHtml(prevMap,prevSubMap);setTimeout(()=>{updateFixedSubTotalInSetup();updateBudgetTotal();},0);$('btnSaveBudget').onclick=async()=>{const budgets=saveBudgetFromSetup();D.budget=budgets;closeModal('budgetModal');render();const bSave2=D.budget.map(x=>({category:x.category,budget:x.budget,subItems:x.subItems||undefined,memo:x.memo||undefined,formula:x.formula||undefined}));await gasPost({action:'writeBudget',month:curMonth,budgets:bSave2});toast('✓ 예산 저장 완료');};openModal('budgetModal');}
 
@@ -447,11 +423,9 @@ $('btnAddMemo').onclick=addMemo;$('btnCopyPrevBudget').onclick=copyPrevBudget;$(
 $('btnCloseBudget').onclick=()=>closeModal('budgetModal');$('btnCloseExtra').onclick=()=>closeModal('extraModal');$('btnCloseEdit').onclick=()=>closeModal('editModal');$('btnClosePlan').onclick=()=>closeModal('planModal');$('btnSavePlan').onclick=savePlanItem;
 ['addItemModal','editModal','budgetModal','extraModal','planModal','travelEditModal','assetModal','planAddModal','confirmModal'].forEach(id=>{$(id).onclick=e=>{if(e.target===e.currentTarget)e.target.classList.remove('show');};});
 
-// ★ 핵심 수정: GAS 데이터를 ALL_DATA에 채운 뒤 ensureCarryOver를 모든 월에 순서대로 적용
 function applyAllData(result){
   const months=result.months||[],md=result.monthData||{};
 
-  // 1단계: 모든 월 데이터를 ALL_DATA에 저장 (이월 항목 없이 순수 데이터만)
   for(const m of months){
     const res=md[m];
     if(!res||res.error)continue;
@@ -470,14 +444,7 @@ function applyAllData(result){
   if(result.assets?.length){sharedAssets.length=0;result.assets.forEach((a,i)=>sharedAssets.push({id:i+1,...a}));}
   if(result.plan){try{const p=typeof result.plan==='string'?JSON.parse(result.plan):result.plan;if(p.income)sharedPlan.income=p.income;if(p.fixed)sharedPlan.fixed=p.fixed;if(p.living)sharedPlan.living=p.living;if(p.allowance)sharedPlan.allowance=p.allowance;const allIds=[...sharedPlan.income,...sharedPlan.fixed,...sharedPlan.living,...sharedPlan.allowance].map(x=>x.id||0);plNid=Math.max(...allIds,99)+1;}catch(e){console.warn('plan parse err',e);}}
 
-  // 2단계: 월을 오름차순으로 정렬한 뒤 순서대로 이월 처리 (이전 달 → 다음 달 순)
-  // 이렇게 해야 이월 잔액이 체인처럼 정확하게 전파됨
-  const sortedMonths=[...months].sort();
-  for(const m of sortedMonths){
-    ensureCarryOver(m);
-  }
-
-  // 3단계: picker 구성
+  // ★ ensureCarryOver 완전 제거 - 이월 없이 picker만 구성
   if(months.length){
     const sel=$('monthPicker');
     const localMonths=Object.keys(ALL_DATA).filter(m=>!months.includes(m));
@@ -501,11 +468,8 @@ function applyAllData(result){
   loadMonth(curMonth);
 }
 
-// ★ 핵심 수정: 앱 시작 시 loadMonth 단 한 번만 호출 (스켈레톤 표시용)
-// ensureCarryOver는 applyAllData 안에서만 실행됨
 if(!ALL_DATA[curMonth])ALL_DATA[curMonth]=emptyMonth();
 D=ALL_DATA[curMonth];
-// 스켈레톤은 loadingSkeleton div가 처리하므로 render만 최소 호출
 render();
 
 (async()=>{
